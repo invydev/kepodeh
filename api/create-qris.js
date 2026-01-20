@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "amount dan order_id wajib diisi" });
     }
 
-    const project = process.env.PAKASIR_PROJECT;
+    const project = "fishit-market";
     const api_key = "BLTv3xG4QMEmgSO0teA5WCvEQZRA3Wx9";
 
     if (!project || !api_key) {
