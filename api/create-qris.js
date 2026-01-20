@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     }
 
     const project = process.env.PAKASIR_PROJECT;
-    const api_key = process.env.PAKASIR_API_KEY;
+    const api_key = "BLTv3xG4QMEmgSO0teA5WCvEQZRA3Wx9";
 
     if (!project || !api_key) {
       return res.status(500).json({ error: "Konfigurasi server belum lengkap" });
