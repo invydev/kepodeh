@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Renzz Marketplace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-soft: #0f172a;
+      --bg-softer: #020617;
+      --primary: #38bdf8;
+      --primary-soft: rgba(56, 189, 248, 0.15);
+      --accent: #a855f7;
+      --danger: #f97373;
+      --success: #4ade80;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: rgba(148, 163, 184, 0.2);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 20px 40px rgba(15, 23, 42, 0.7);
+      --transition: 0.18s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.99));
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 22px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.08), transparent 60%),
+                  radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.08), transparent 60%);
+      opacity: 0.9;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: 20px;
+      padding: 12px 16px;
+      background: linear-gradient(120deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.4));
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 30% 0, #38bdf8, #0f172a 55%, #020617 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f9fafb;
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: .04em;
+      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title span {
+      background: linear-gradient(90deg, #e5e7eb, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+    }
+
+    .pill-dot.live {
+      background: var(--success);
+      box-shadow: 0 0 12px rgba(74, 222, 128, 0.6);
+    }
+
+    .pill-dot.id {
+      background: var(--primary);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1.15fr);
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .card {
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 16px 16px 14px;
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      opacity: 0.4;
+      background: radial-gradient(circle at 20% 0, rgba(56, 189, 248, 0.12), transparent 55%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-title strong {
+      color: var(--primary);
+    }
+
+    .card-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .product {
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 10px 10px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .product::before {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      opacity: 0;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.16), transparent 55%);
+      transition: opacity var(--transition);
+      pointer-events: none;
+    }
+
+    .product:hover {
+      transform: translateY(-3px) translateZ(0);
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 12px 22px rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0.98));
+    }
+
+    .product:hover::before {
+      opacity: 1;
+    }
+
+    .product.selected {
+      border-color: var(--primary);
+      box-shadow: 0 10px 26px rgba(56, 189, 248, 0.4);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(8, 47, 73, 0.85));
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .product-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .product-main {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .product-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      background: radial-gradient(circle at 30% 0, rgba(56, 189, 248, 0.6), rgba(15, 23, 42, 1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .product-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .product-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .product-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .product-price {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .product-price span {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-right: 3px;
+    }
+
+    .product-cta {
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .product-cta span {
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    /* Checkout Card */
+
+    .checkout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checkout-body {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkout-empty {
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      padding: 12px 11px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .checkout-empty-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    .checkout-item {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 10px 11px 9px;
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkout-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      gap: 6px;
+    }
+
+    .checkout-row strong {
+      font-size: 13px;
+      color: #e5e7eb;
+    }
+
+    .price-major {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .qty-input {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .qty-input input {
+      width: 60px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 4px 8px;
+      font-size: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    .qty-input input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    .note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .note strong {
+      color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      border-radius: 999px;
+      border: none;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      background-image: linear-gradient(120deg, #38bdf8, #a855f7);
+      color: #020617;
+      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.4);
+      transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 32px rgba(56, 189, 248, 0.55);
+      filter: brightness(1.03);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.35);
+      filter: brightness(0.98);
+    }
+
+    .btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: grayscale(0.2);
+    }
+
+    .btn-secondary {
+      background-image: none;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--muted);
+      box-shadow: none;
+      font-size: 11px;
+      padding: 6px 10px;
+      text-transform: none;
+      letter-spacing: 0.05em;
+    }
+
+    .status-line {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.8);
+    }
+
+    .status-dot.pending {
+      background: #facc15;
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+    }
+
+    .status-dot.success {
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.8);
+    }
+
+    .status-dot.failed {
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.8);
+    }
+
+    .status-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+    }
+
+    /* QR MODAL */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .overlay.hidden {
+      display: none;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 380px;
+      border-radius: 20px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.9);
+      padding: 16px 16px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      opacity: 0.45;
+      background: radial-gradient(circle at 10% 0, rgba(56, 189, 248, 0.18), transparent 55%),
+      radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.22), transparent 55%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .modal-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .chip {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qr-box {
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.98));
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qr-img-wrapper {
+      background: #020617;
+      border-radius: 18px;
+      padding: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+    }
+
+    .qr-img {
+      max-width: 220px;
+      max-height: 220px;
+      width: 100%;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .qr-caption {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .invoice-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 8px;
+      row-gap: 4px;
+      font-size: 11px;
+    }
+
+    .invoice-label {
+      color: var(--muted);
+    }
+
+    .invoice-value {
+      color: #e5e7eb;
+      text-align: right;
+    }
+
+    .invoice-value.em {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .pill-soft {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-soft strong {
+      color: #e5e7eb;
+    }
+
+    .pill-soft small {
+      color: var(--muted);
+    }
+
+    .status-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.7);
+      background: rgba(15, 23, 42, 0.96);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #facc15;
+    }
+
+    .status-pill.success {
+      border-color: rgba(74, 222, 128, 0.7);
+      color: var(--success);
+    }
+
+    .status-pill.failed {
+      border-color: rgba(248, 113, 113, 0.8);
+      color: var(--danger);
+    }
+
+    .status-pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .close-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.96);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--muted);
+      transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .close-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      border-color: rgba(248, 250, 252, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .helper-text {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .helper-text strong {
+      color: var(--primary);
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 10px;
+      }
+
+      .app {
+        padding: 14px 14px 16px;
+        border-radius: 18px;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .modal {
+        max-width: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-logo">R</div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span>Renzz Marketplace</span>
+          <span style="font-weight: 500; font-size: 11px; color: var(--muted);"></span>
+        </div>
+        <div class="brand-subtitle">
+          Store Otomatis Tanpa Ribet <strong>PROSES OTOMATIS</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="pill">
+        <span class="pill-dot live"></span>
+        LIVE QRIS
+      </div>
+      <div class="pill">
+        <span class="pill-dot id"></span>
+        IDR
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- PRODUCT LIST -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            CATALOG <strong>ROBUX</strong>
+          </div>
+          <div class="card-subtitle">
+            Pilih Salah Satu Produk Untuk Melanjutkan Ke Pembayaran.
+          </div>
+        </div>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- Diisi via JavaScript -->
+      </div>
+    </section>
+
+    <!-- CHECKOUT / PAYMENT PANEL -->
+    <section class="card checkout">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            PANEL <strong>PEMBAYARAN</strong>
+          </div>
+          <div class="card-subtitle">
+            Ringkasan order & generate Qris otomatis
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-body">
+        <div id="checkoutContent">
+          <div class="checkout-empty">
+            <span class="checkout-empty-dot"></span>
+            <span>Pilih Produk Terlebih Dahulu Dari Katalog Di Atas</span>
+          </div>
+        </div>
+
+        <div class="note">
+          • <strong>Minimal transaksi: Rp 1.000</strong><br/>
+          • PROSES OTOMATIS TANPA <strong>RIBET</strong><br/>
+          • PRODUK INI DIKIRIM OTOMATIS
+        </div>
+
+        <button class="btn" id="payButton" disabled>
+          <span>Bayar via QRIS</span>
+          <span>●</span>
+        </button>
+
+        <div class="status-line" id="statusLine">
+          <span class="status-dot"></span>
+          <span class="status-label">STATUS: BELUM ADA TRANSAKSI</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- QR MODAL -->
+<div class="overlay hidden" id="qrModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">INVOICE TRANSAKSI</div>
+      <div class="chip">RENZZ MARKET</div>
+    </div>
+    <div class="modal-body">
+      <div class="qr-box">
+        <div class="qr-img-wrapper">
+          <img id="qrImage" class="qr-img" src="" alt="QRIS Kode Pembayaran"/>
+        </div>
+        <div class="qr-caption">
+          Scan QRIS dengan aplikasi e-wallet / mobile banking kamu.<br/>
+          <strong>Scan Qris Berikut</strong>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <div class="pill-soft" id="invoiceAmountPill">
+          <small>Nominal</small>
+          <strong>Rp 0</strong>
+        </div>
+        <div class="status-pill" id="modalStatusPill">
+          <span class="status-pill-dot"></span>
+          <span id="modalStatusText">MENUNGGU PEMBAYARAN</span>
+        </div>
+      </div>
+
+      <div class="invoice-grid" id="invoiceGrid">
+        <div class="invoice-label">Order ID</div>
+        <div class="invoice-value" id="invoiceOrderId">-</div>
+
+        <div class="invoice-label">Produk</div>
+        <div class="invoice-value" id="invoiceProductName">-</div>
+
+        <div class="invoice-label">Qty</div>
+        <div class="invoice-value" id="invoiceQty">1</div>
+
+        <div class="invoice-label">Metode</div>
+        <div class="invoice-value">QRIS</div>
+
+        <div class="invoice-label">Status</div>
+        <div class="invoice-value em" id="invoiceStatusText">Menunggu</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modalCopyBtn">Copy Order ID</button>
+        <button class="close-btn" id="modalCloseBtn" title="Tutup">
+          ×
+        </button>
+      </div>
+      <div class="helper-text">
+        Powered by <strong>RENZZ MARKET</strong> • QRIS
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /***************************************************
+   *  KONFIGURASI BACKEND
+   ***************************************************/
+  const BACKEND_BASE_URL = "https://kepodeh.vercel.app/"; // URL backend Vercel kamu
+
+  /***************************************************
+   *  DATA PRODUK PANEL PTERODACTYL
+   *  (Silakan sesuaikan HARGA & LINK TELEGRAM)
+   ***************************************************/
+  const products = [
+    // ROLE / RESELLER (tidak perlu username, kirim link TG)
+    {
+      id: "reseller-panel",
+      name: "100 ROBUX",
+      description: "Gamepass",
+      price: 22000,
+      emoji: "💦",
+      tag: "ROBUX",
+      badge: "VIP",
+      requireUsername: true,
+      telegramGroupLink: "DELAY 5-6HARI YA KONTOL" // TODO: ganti link
+    },
+    {
+      id: "tangan-kanan-panel",
+      name: "200 ROBUX",
+      description: "Gamepass",
+      price: 63000,
+      emoji: "💦",
+      tag: "ROBUX",
+      badge: "VIP",
+      requireUsername: true,
+      telegramGroupLink: "DELAY 5-6HARI YA KONTOL" // TODO: ganti link
+    }
+  ];
+
+  /***************************************************
+   *  STATE APLIKASI
+   ***************************************************/
+  let selectedProduct = null;
+  let currentOrder = null;
+  let pollTimer = null;
+  const MAX_POLL_ATTEMPTS = 24;
+  const POLL_INTERVAL_MS = 3000;
+
+  /***************************************************
+   *  HELPER
+   ***************************************************/
+  function formatRupiah(amount) {
+    return amount.toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0
+    });
+  }
+
+  function createOrderId() {
+    const now = new Date();
+    const tanggal = now.toISOString().split("T")[0];
+    const uniq = Date.now();
+    return `${tanggal}-${uniq}`;
+  }
+
+  function setStatusLine(statusText, type = "idle") {
+    const line = document.getElementById("statusLine");
+    const dot = line.querySelector(".status-dot");
+    const label = line.querySelector(".status-label");
+
+    dot.classList.remove("pending", "success", "failed");
+    if (type === "pending") dot.classList.add("pending");
+    if (type === "success") dot.classList.add("success");
+    if (type === "failed") dot.classList.add("failed");
+
+    label.textContent = `STATUS: ${statusText}`;
+  }
+
+  function setModalStatus(type, label) {
+    const pill = document.getElementById("modalStatusPill");
+    const text = document.getElementById("modalStatusText");
+    const invStatus = document.getElementById("invoiceStatusText");
+
+    pill.classList.remove("success", "failed");
+    if (type === "success") pill.classList.add("success");
+    if (type === "failed") pill.classList.add("failed");
+
+    text.textContent = label;
+    invStatus.textContent = label;
+  }
+
+  function openModal() {
+    document.getElementById("qrModal").classList.remove("hidden");
+  }
+
+  function closeModal() {
+    document.getElementById("qrModal").classList.add("hidden");
+  }
+
+  function showError(message) {
+    alert(message);
+  }
+
+  /***************************************************
+   *  RENDER PRODUK
+   ***************************************************/
+  function renderProducts() {
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = "";
+
+    products.forEach((p) => {
+      const el = document.createElement("div");
+      el.className = "product";
+      el.dataset.id = p.id;
+
+      el.innerHTML = `
+        <div class="product-badge">${p.badge}</div>
+        <div class="product-tag">${p.tag}</div>
+        <div class="product-main">
+          <div class="product-thumb">${p.emoji}</div>
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="product-desc">${p.description}</div>
+            <div class="product-meta">
+              <div class="product-price">
+                <span>Mulai</span>${formatRupiah(p.price)}
+              </div>
+              <div class="product-cta">
+                <span>●</span> Pilih
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      el.addEventListener("click", () => handleSelectProduct(p.id));
+      grid.appendChild(el);
+    });
+  }
+
+  /***************************************************
+   *  HANDLE PILIH PRODUK
+   ***************************************************/
+  function handleSelectProduct(productId) {
+    selectedProduct = products.find((p) => p.id === productId) || null;
+
+    document.querySelectorAll(".product").forEach((card) => {
+      card.classList.toggle("selected", card.dataset.id === productId);
+    });
+
+    const checkout = document.getElementById("checkoutContent");
+    const payButton = document.getElementById("payButton");
+
+    if (!selectedProduct) {
+      checkout.innerHTML = `
+        <div class="checkout-empty">
+          <span class="checkout-empty-dot"></span>
+          <span>Pilih produk terlebih dahulu dari katalog di sebelah kiri.</span>
+        </div>
+      `;
+      payButton.disabled = true;
+      return;
+    }
+
+    // input username only kalau requireUsername
+    const usernameField = selectedProduct.requireUsername
+      ? `
+        <div class="checkout-row" style="margin-top:6px;">
+          <div class="qty-input" style="flex:1;">
+            <span>Username Panel</span>
+            <input type="text" id="panelUsernameInput" placeholder="username_panel" />
+          </div>
+        </div>
+      `
+      : "";
+
+    checkout.innerHTML = `
+      <div class="checkout-item">
+        <div class="checkout-row">
+          <div>
+            <div class="muted" style="font-size: 11px;">Produk dipilih</div>
+            <strong>${selectedProduct.name}</strong>
+          </div>
+          <div class="muted" style="font-size: 11px;">
+            Base price: <span class="price-major">${formatRupiah(selectedProduct.price)}</span>
+          </div>
+        </div>
+        <div class="checkout-row">
+          <div class="qty-input">
+            <span>Qty</span>
+            <input type="number" id="qtyInput" min="1" step="1" value="1" />
+          </div>
+          <div>
+            <span class="muted" style="font-size: 11px;">Estimasi total</span><br/>
+            <strong id="totalAmountLabel" class="price-major">${formatRupiah(selectedProduct.price)}</strong>
+          </div>
+        </div>
+        ${usernameField}
+      </div>
+    `;
+
+    setStatusLine("PRODUK DIPILIH • SIAP MEMBUAT QRIS", "idle");
+    payButton.disabled = false;
+
+    const qtyInput = document.getElementById("qtyInput");
+    qtyInput.addEventListener("input", () => {
+      const qty = Math.max(1, parseInt(qtyInput.value || "1", 10));
+      qtyInput.value = qty;
+      const total = selectedProduct.price * qty;
+      document.getElementById("totalAmountLabel").textContent = formatRupiah(total);
+    });
+  }
+
+  /***************************************************
+   *  CREATE QRIS TRANSACTION VIA BACKEND VERCEL
+   ***************************************************/
+  async function createQrisTransaction(amount, orderId) {
+    const resRaw = await fetch(`${BACKEND_BASE_URL}/api/create-qris`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, order_id: orderId })
+    });
+
+    if (!resRaw.ok) {
+      const errText = await resRaw.text().catch(() => "");
+      throw new Error("Gagal membuat transaksi QRIS. " + errText);
+    }
+
+    const data = await resRaw.json();
+    const payment = data.payment || data || {};
+
+    if (!payment || (!payment.payment_number && !data.code)) {
+      throw new Error("Gagal membuat transaksi QRIS (data tidak lengkap).");
+    }
+
+    const code = data.code || payment.code || "";
+    const qrisString = payment.payment_number || data.qris_string || "";
+
+    let qrUrl = "";
+    if (code) {
+      qrUrl = `https://app.pakasir.com/qris/${code}.png`;
+    } else if (qrisString) {
+      qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
+        qrisString
+      )}&size=500&format=png`;
+    } else {
+      throw new Error("QRIS tidak tersedia dari response.");
+    }
+
+    return { qrUrl, code };
+  }
+
+  /***************************************************
+   *  AKSI SETELAH PEMBAYARAN BERHASIL
+   *  - Panel RAM  : panggil backend buat akun panel
+   *  - Role Panel : kirim link grup Telegram
+   ***************************************************/
+  async function handleAfterPaymentSuccess(orderId, amount) {
+    if (!currentOrder || !selectedProduct) return;
+
+    // Jika produk butuh username panel → call backend
+    if (selectedProduct.requireUsername) {
+      const payload = {
+        order_id: orderId,
+        amount,
+        username: currentOrder.panelUsername,
+        product_id: selectedProduct.id
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/api/create-panel-account`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          alert(
+            "✅ Pembayaran berhasil, tetapi terjadi kesalahan saat membuat akun panel.\n" +
+              "Silakan hubungi admin dengan membawa Order ID.\n\n" +
+              txt
+          );
+          return;
+        }
+
+        const data = await res.json().catch(() => ({}));
+        const panel = data.panel || data || {};
+
+        const loginUser = panel.username || currentOrder.panelUsername;
+        const loginPass = panel.password || "(cek DM / catatan dari admin)";
+        const loginUrl = panel.login_url || "URL panel default kamu";
+
+        alert(
+          "✅ Akun panel berhasil dibuat.\n\n" +
+            "Order ID : " +
+            orderId +
+            "\n" +
+            "Username : " +
+            loginUser +
+            "\n" +
+            "Password : " +
+            loginPass +
+            "\n" +
+            "Panel    : " +
+            loginUrl
+        );
+      } catch (err) {
+        console.error("Error create panel account:", err);
+        alert(
+          "✅ Pembayaran berhasil, tetapi terjadi error saat membuat akun panel.\n" +
+            "Silakan hubungi admin dengan membawa Order ID."
+        );
+      }
+    } else if (selectedProduct.telegramGroupLink) {
+      // Paket role / reseller → kirim link grup
+      const url = selectedProduct.telegramGroupLink;
+      alert(
+        "✅ Pembayaran berhasil!\n\n" +
+          "Silakan masuk ke grup Telegram sesuai paket kamu:\n" +
+          url
+      );
+      try {
+        window.open(url, "_blank");
+      } catch (_) {
+        // abaikan kalau popup diblok
+      }
+    }
+  }
+
+  /***************************************************
+   *  POLLING STATUS TRANSAKSI VIA BACKEND
+   ***************************************************/
+  function startPollingStatus(orderId, amount) {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+
+    let attempts = 0;
+
+    setStatusLine("MENUNGGU PEMBAYARAN...", "pending");
+    setModalStatus("pending", "MENUNGGU PEMBAYARAN");
+
+    pollTimer = setInterval(async () => {
+      attempts++;
+      try {
+        const detailUrl =
+          `${BACKEND_BASE_URL}/api/transaction-detail` +
+          `?amount=${encodeURIComponent(amount)}` +
+          `&order_id=${encodeURIComponent(orderId)}`;
+
+        const resRaw = await fetch(detailUrl);
+
+        if (!resRaw.ok) {
+          console.error("Gagal ambil status:", await resRaw.text());
+          return;
+        }
+
+        const det = await resRaw.json();
+        const tx = det.transaction || det || {};
+        const status = (tx.status || "").toString().toUpperCase();
+
+        if (!status) return;
+
+        if (
+          status.includes("SUCCESS") ||
+          status.includes("COMPLETED") ||
+          status.includes("BERHASIL")
+        ) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+          setStatusLine("PEMBAYARAN BERHASIL", "success");
+          setModalStatus("success", "PEMBAYARAN BERHASIL");
+
+          await handleAfterPaymentSuccess(orderId, amount);
+
+          return;
+        }
+
+        if (
+          status.includes("FAILED") ||
+          status.includes("EXPIRED") ||
+          status.includes("GAGAL")
+        ) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+          setStatusLine("PEMBAYARAN GAGAL / EXPIRED", "failed");
+          setModalStatus("failed", "PEMBAYARAN GAGAL / EXPIRED");
+          alert("❌ Pembayaran gagal / expired.\n\nOrder ID: " + orderId);
+          return;
+        }
+      } catch (err) {
+        console.error("Error saat cek status:", err);
+      }
+
+      if (attempts >= MAX_POLL_ATTEMPTS) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        setStatusLine("STATUS TIDAK BERUBAH SETELAH ±1 MENIT", "failed");
+        setModalStatus("failed", "TIMEOUT / TIDAK DIKETAHUI");
+        alert(
+          "⚠️ Status belum berubah setelah cukup lama.\n" +
+            "Silakan cek manual di dashboard Pakasir.\n\nOrder ID: " +
+            orderId
+        );
+      }
+    }, POLL_INTERVAL_MS);
+  }
+
+  /***************************************************
+   *  HANDLE BAYAR
+   ***************************************************/
+  async function handlePay() {
+    if (!selectedProduct) {
+      showError("Pilih produk terlebih dahulu.");
+      return;
+    }
+
+    const qtyInput = document.getElementById("qtyInput");
+    const qty = Math.max(1, parseInt(qtyInput?.value || "1", 10));
+    const amount = selectedProduct.price * qty;
+
+    if (!Number.isFinite(amount) || amount < 1000) {
+      showError("Nominal tidak valid. Minimal Rp 1.000.");
+      return;
+    }
+
+    // Validasi username untuk produk panel
+    let panelUsername = "";
+    if (selectedProduct.requireUsername) {
+      const usernameInput = document.getElementById("panelUsernameInput");
+      panelUsername = (usernameInput?.value || "").trim();
+
+      if (!panelUsername) {
+        showError("Masukin Username Roblox Lu Jing");
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]{3,32}$/.test(panelUsername)) {
+        showError(
+          "Username hanya boleh huruf/angka/underscore, 3–32 karakter."
+        );
+        return;
+      }
+    }
+
+    const payButton = document.getElementById("payButton");
+    payButton.disabled = true;
+    payButton.innerHTML = `<span>Membuat QRIS...</span>`;
+
+    setStatusLine("MENGIRIM PERMINTAAN KE SERVER...", "pending");
+
+    const orderId = createOrderId();
+    currentOrder = {
+      orderId,
+      amount,
+      productName: selectedProduct.name,
+      qty,
+      panelUsername
+    };
+
+    try {
+      const res = await createQrisTransaction(amount, orderId);
+
+      document.getElementById("invoiceOrderId").textContent = orderId;
+      document.getElementById("invoiceProductName").textContent =
+        selectedProduct.name;
+      document.getElementById("invoiceQty").textContent = qty.toString();
+      document
+        .getElementById("invoiceAmountPill")
+        .querySelector("strong").textContent = formatRupiah(amount);
+      document.getElementById("qrImage").src = res.qrUrl;
+
+      setModalStatus("pending", "MENUNGGU PEMBAYARAN");
+      openModal();
+      setStatusLine(
+        "QRIS BERHASIL DIBUAT • MENUNGGU PEMBAYARAN",
+        "pending"
+      );
+
+      startPollingStatus(orderId, amount);
+    } catch (err) {
+      console.error(err);
+      showError(
+        "Terjadi kesalahan saat membuat transaksi QRIS.\n\n" + err.message
+      );
+      setStatusLine("GAGAL MEMBUAT QRIS", "failed");
+    } finally {
+      payButton.disabled = false;
+      payButton.innerHTML = `<span>Beli Produk</span><span>●</span>`;
+    }
+  }
+
+  /***************************************************
+   *  INIT
+   ***************************************************/
+  document.addEventListener("DOMContentLoaded", () => {
+    renderProducts();
+    setStatusLine("BELUM ADA TRANSAKSI", "idle");
+
+    document.getElementById("payButton").addEventListener("click", handlePay);
+
+    document.getElementById("modalCloseBtn").addEventListener("click", () => {
+      closeModal();
+    });
+
+    document.getElementById("modalCopyBtn").addEventListener("click", () => {
+      if (currentOrder?.orderId) {
+        navigator.clipboard.writeText(currentOrder.orderId).then(
+          () => alert("Order ID telah disalin ke clipboard."),
+          () => alert("Gagal menyalin Order ID, silakan copy manual.")
+        );
+      }
+    });
+
+    document.getElementById("qrModal").addEventListener("click", (e) => {
+      if (e.target.id === "qrModal") {
+        closeModal();
+      }
+    });
+  });
+
+  /***************************************************
+   * CATATAN:
+   * - Jika API Pakasir tidak mengizinkan CORS secara langsung,
+   *   kamu butuh backend proxy (Node.js / PHP / dll) untuk
+   *   meneruskan request ke app.pakasir.com.
+   * - Logika transaksi & polling status disamakan dengan
+   *   versi handler WhatsApp yang kamu kirim.
+   ***************************************************/
+</script>
+</body>
+</html>
