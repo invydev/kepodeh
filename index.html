@@ -1533,7 +1533,7 @@
     const qty = Math.max(1, parseInt(qtyInput?.value || "1", 10));
     const amount = selectedProduct.price * qty;
 
-    if (!Number.isFinite(amount) || amount < 1000) {
+    if (!Number.isFinite(amount) || amount < 50) {
       showError("Nominal tidak valid. Minimal Rp 1.000.");
       return;
     }
