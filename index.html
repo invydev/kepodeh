@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kynas Store - Modern Pink</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-pink: #f43f5e;
@@ -13,6 +13,7 @@
             --dark-bg: #0f172a;
             --card-bg: #1e293b;
             --text-light: #f8fafc;
+            --text-muted: #94a3b8;
             --gradient: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
         }
 
@@ -26,7 +27,7 @@
 
         .card { background: var(--card-bg); border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
 
-        /* Grid Produk Ramping */
+        /* Grid Produk */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .item { 
             background: rgba(0,0,0,0.2); border: 1px solid transparent; border-radius: 12px; 
@@ -38,7 +39,7 @@
         .p-price { font-weight: 800; font-size: 14px; color: var(--primary-pink); }
         .p-stock { font-size: 9px; color: #64748b; }
 
-        /* Input & Button Proporsional */
+        /* Input & Button */
         .input-label { font-size: 11px; font-weight: 700; color: var(--secondary-pink); text-transform: uppercase; margin-bottom: 8px; display: block; }
         .input-field { 
             width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; 
@@ -46,7 +47,6 @@
         }
         .input-field:focus { border-color: var(--primary-pink); }
 
-        /* Tombol yang diperkecil */
         .btn { 
             width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; 
             cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -55,17 +55,28 @@
         }
         .btn:disabled { background: #475569; box-shadow: none; opacity: 0.6; cursor: not-allowed; }
 
-        /* Modal & Invoice */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card-bg); border-radius: 20px; padding: 20px; width: 100%; max-width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        /* --- TAMPILAN INVOICE (SESUAI GAMBAR 1) --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         
-        .qr-frame { background: white; padding: 8px; border-radius: 10px; margin: 15px auto; width: 180px; }
-        .qr-frame img { width: 100%; display: block; }
-        .qr-amount { font-size: 22px; font-weight: 800; color: var(--primary-pink); }
+        .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .inv-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+        .inv-label { color: var(--text-muted); }
+        .inv-val { font-weight: 700; color: var(--text-light); }
+        .inv-val.total { display: flex; align-items: center; gap: 5px; }
+        .inv-val.method { color: #22c55e; font-weight: 800; }
 
-        .inv-details { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; text-align: left; margin: 15px 0; font-size: 12px; }
-        .inv-row { display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
-        .inv-val { font-weight: 700; color: var(--primary-pink); }
+        /* Status Transaksi Vertikal */
+        .status-list { list-style: none; margin-top: 10px; }
+        .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 14px; color: var(--text-muted); }
+        .status-item.active { color: #f59e0b; }
+        .status-item.done { color: var(--text-light); }
+        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 12px; }
+        .status-item.active .dot { border-color: #f59e0b; background: radial-gradient(circle, #f59e0b 4px, transparent 5px); }
+
+        .qr-area { text-align: center; }
+        .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 15px auto; width: 200px; display: inline-block; }
+        .qr-frame img { width: 100%; display: block; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -73,7 +84,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="mainPage">
     <div class="header">
         <h1>Kynas Store</h1>
         <p>Proses otomatis & instan</p>
@@ -94,32 +105,44 @@
 </div>
 
 <div class="modal-overlay" id="modalQR">
-    <div class="modal-content">
-        <h3 style="font-size: 16px;">Scan Pembayaran</h3>
-        <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
-        <div class="qr-amount" id="qrAmount">Rp 0</div>
-        <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">ID: <span id="resID"></span></p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#ef4444; font-size:11px; margin-top:15px; cursor:pointer;">Batalkan</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="modalInv">
-    <div class="modal-content">
-        <div style="background:#22c55e; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">✓</div>
-        <h2 style="color:#22c55e; font-size:18px;">Berhasil!</h2>
-        <div class="inv-details">
-            <div class="inv-row"><span>User</span><span class="inv-val" id="invUser"></span></div>
-            <div class="inv-row"><span>Item</span><span class="inv-val" id="invItem"></span></div>
-            <div class="inv-row"><span>ID</span><span id="invID" style="font-size:10px; opacity:0.7;"></span></div>
+    <div class="header" style="width:100%; max-width:360px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-size:18px;">Checkout</h2>
+        <div style="width:20px; height:2px; background:white; position:relative;">
+            <div style="width:20px; height:2px; background:white; position:absolute; top:-6px;"></div>
+            <div style="width:20px; height:2px; background:white; position:absolute; top:6px;"></div>
         </div>
-        <button onclick="location.href=location.pathname" class="btn">SELESAI</button>
+    </div>
+
+    <div class="inv-card">
+        <div class="inv-row"><span class="inv-label">Harga</span><span class="inv-val" id="resPrice">Rp 0</span></div>
+        <div class="inv-row"><span class="inv-label">Biaya Admin</span><span class="inv-val">Rp 338</span></div>
+        <div class="inv-row"><span class="inv-label">Sub Total</span><span class="inv-val total" id="resTotal">Rp 0 <span style="font-size:10px; opacity:0.6;">📄</span></span></div>
+        <div class="inv-row"><span class="inv-label">Metode Pembayaran</span><span class="inv-val method">QRIS NB</span></div>
+    </div>
+
+    <div class="inv-card">
+        <h3 style="font-size:16px; margin-bottom:15px;">Status Transaksi</h3>
+        <ul class="status-list">
+            <li class="status-item done"><div class="dot">✓</div> Order Dibuat</li>
+            <li class="status-item active" id="statusWait"><div class="dot"></div> Menunggu Pembayaran</li>
+            <li class="status-item" id="statusProcess"><div class="dot"></div> Order Diproses</li>
+            <li class="status-item" id="statusDone"><div class="dot"></div> Order Selesai</li>
+        </ul>
+    </div>
+
+    <div class="inv-card qr-area">
+        <p style="font-size:14px; font-weight:600;">Silahkan Scan QRIS Berikut :</p>
+        <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
+        <button class="btn" style="background:#2563eb; width:auto; padding:8px 20px; margin:0 auto;">Download QR</button>
+        <p style="font-size:10px; color:#94a3b8; margin-top:15px;">ID Transaksi: <span id="resID"></span></p>
+        <button onclick="location.reload()" style="background:none; border:none; color:#ef4444; font-size:12px; margin-top:20px; cursor:pointer; font-weight:700;">BATALKAN PESANAN</button>
     </div>
 </div>
 
 <script>
     const API = "https://kepodeh.vercel.app";
     const products = [
-        { id: '1', name: '100 ROBUX', price: 15000, stock: 10 },
+        { id: '1', name: '100 ROBUX', price: 1111, stock: 1 },
         { id: '2', name: '500 ROBUX', price: 70000, stock: 5 },
         { id: '3', name: '1000 ROBUX', price: 135000, stock: 0 }
     ];
@@ -161,9 +184,13 @@
             const d = await res.json();
             const p = d.payment || d;
 
-            document.getElementById('qrImg').src = p.code ? `https://app.pakasir.com/qris/${p.code}.png` : `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number)}`;
-            document.getElementById('qrAmount').innerText = "Rp " + selected.price.toLocaleString();
+            // Update UI Invoice
+            document.getElementById('resPrice').innerText = "Rp " + selected.price.toLocaleString();
+            document.getElementById('resTotal').innerText = "Rp " + (selected.price + 338).toLocaleString();
             document.getElementById('resID').innerText = inv;
+            document.getElementById('qrImg').src = p.code ? `https://app.pakasir.com/qris/${p.code}.png` : `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number)}`;
+            
+            document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
 
             poll = setInterval(async () => {
@@ -171,31 +198,30 @@
                 const resCheck = await check.json();
                 if((resCheck.status||"").toUpperCase().includes("SUCCESS")) {
                     clearInterval(poll);
-                    showSuccess(u, selected.name, inv);
+                    handleSuccess();
                 }
             }, 4000);
         } catch (e) { alert("Gagal!"); location.reload(); }
     }
 
-    function showSuccess(u, item, id) {
-        document.getElementById('modalQR').style.display = 'none';
-        document.getElementById('invUser').innerText = u.toUpperCase();
-        document.getElementById('invItem').innerText = item;
-        document.getElementById('invID').innerText = id;
-        document.getElementById('modalInv').style.display = 'flex';
-        confetti({ particleCount: 100, spread: 70 });
+    function handleSuccess() {
+        // Update Status ke Berhasil
+        const sWait = document.getElementById('statusWait');
+        const sProc = document.getElementById('statusProcess');
+        const sDone = document.getElementById('statusDone');
+
+        sWait.className = "status-item done"; sWait.innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
+        sProc.className = "status-item active";
         
-        const newUrl = window.location.pathname + `?inv=${id}&user=${u}&item=${item}`;
-        window.history.pushState({}, '', newUrl);
+        confetti({ particleCount: 150, spread: 70 });
+
+        setTimeout(() => {
+            sProc.className = "status-item done"; sProc.innerHTML = '<div class="dot">✓</div> Order Diproses';
+            sDone.className = "status-item done"; sDone.innerHTML = '<div class="dot">✓</div> Order Selesai';
+        }, 3000);
     }
 
-    window.onload = () => {
-        render();
-        const url = new URLSearchParams(window.location.search);
-        if(url.get('inv')) {
-            showSuccess(url.get('user'), url.get('item'), url.get('inv'));
-        }
-    };
+    window.onload = render;
 </script>
 </body>
 </html>
