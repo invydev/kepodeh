@@ -1,166 +1,440 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kynas Store - UI Lama</title>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    /* CSS UI LAMA */
-    :root {
-      --pink: #f43f5e;
-      --soft-pink: #fff1f2;
-    }
-    body { font-family: sans-serif; background: #f8fafc; color: #333; padding: 20px; display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 400px; }
-    
-    .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    h2 { font-size: 16px; margin-bottom: 10px; color: var(--pink); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kynas Store - Modern UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #f43f5e;
+            --secondary-pink: #ec4899; /* Slightly different pink for gradients */
+            --soft-pink: #fbcfe8; /* Lighter pink for accents */
+            --dark-bg: #111827; /* Darker background */
+            --card-bg: #1f2937; /* Slightly lighter dark for cards */
+            --text-light: #f9fafb;
+            --text-muted: #d1d5db;
+            --success-green: #22c55e;
+            --gradient-1: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+            --gradient-2: linear-gradient(135deg, var(--secondary-pink), #f082e6);
+        }
 
-    /* Input & Produk UI LAMA */
-    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    .item { border: 1px solid #ddd; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; }
-    .item.active { border-color: var(--pink); background: var(--soft-pink); }
-    .item.out { opacity: 0.5; cursor: not-allowed; }
-    
-    /* Tombol Pink Klasik */
-    .btn { width: 100%; background: var(--pink); color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-    .btn:disabled { background: #ccc; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { 
+            background-color: var(--dark-bg); 
+            color: var(--text-light); 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="opacity:0.05;"><circle cx="20" cy="20" r="10" fill="%23f43f5e"/><circle cx="80" cy="50" r="15" fill="%23ec4899"/><circle cx="40" cy="90" r="8" fill="%23f43f5e"/></svg>');
+            background-size: 80% auto;
+            background-repeat: no-repeat;
+            background-position: top left;
+        }
+        .container { width: 100%; max-width: 480px; }
 
-    /* Modal Style */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
-    .modal-content { background: white; padding: 20px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; }
-    
-    /* Invoice UI LAMA */
-    .inv-box { background: #f9f9f9; border: 1px dashed #ccc; padding: 10px; text-align: left; margin-top: 10px; border-radius: 8px; }
-    .inv-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-    .inv-val { font-weight: bold; }
-  </style>
+        /* Header */
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { 
+            font-size: 28px; font-weight: 800; 
+            background: var(--gradient-1); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px;
+        }
+        .header p { font-size: 14px; color: var(--text-muted); }
+
+        /* Card Base */
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 18px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        /* Product Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
+        .item { 
+            background: rgba(0,0,0,0.2); 
+            border: 1px solid transparent; 
+            border-radius: 15px; 
+            padding: 18px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        .item::before { /* Border effect on hover */
+            content: ''; position: absolute; inset: 0; border-radius: 15px; padding: 1px; 
+            background: var(--gradient-1); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .item.active::before { opacity: 1; }
+        .item.active { 
+            background: rgba(var(--primary-pink), 0.1); 
+            box-shadow: 0 0 20px rgba(var(--primary-pink), 0.5); 
+            transform: translateY(-3px);
+        }
+        .item.out { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
+        .item.out::before { display: none; } /* Remove border for out of stock */
+
+        .p-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: var(--text-light); }
+        .p-price { 
+            font-weight: 800; font-size: 17px; 
+            background: var(--gradient-2); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .p-stock { font-size: 10px; color: var(--text-muted); margin-top: 5px; }
+
+        /* Input Styles */
+        .input-group { margin-bottom: 20px; }
+        .input-label { 
+            display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; 
+            color: var(--soft-pink); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .input-field { 
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; 
+            color: var(--text-light); font-size: 15px; outline: none; 
+            transition: all 0.3s ease;
+        }
+        .input-field:focus { 
+            border-color: var(--primary-pink); 
+            box-shadow: 0 0 0 3px rgba(var(--primary-pink), 0.3); 
+        }
+
+        /* Buttons */
+        .btn { 
+            width: 100%; padding: 16px; border-radius: 30px; font-weight: 700; 
+            font-size: 16px; cursor: pointer; transition: all 0.3s ease; 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--gradient-1); border: none; color: var(--text-light);
+            box-shadow: 0 8px 20px rgba(var(--primary-pink), 0.4);
+        }
+        .btn:disabled { 
+            background: #475569; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            opacity: 0.7; 
+        }
+        .btn-secondary {
+            background: none; border: none; color: var(--text-muted); 
+            font-size: 13px; margin-top: 15px; cursor: pointer; transition: color 0.3s ease;
+        }
+        .btn-secondary:hover { color: var(--primary-pink); }
+
+        /* Modal Base */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            display: none; align-items: center; justify-content: center; z-index: 100; 
+            padding: 20px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .modal-content { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 25px; 
+            padding: 30px; 
+            width: 100%; max-width: 400px; 
+            text-align: center; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        /* QR Modal */
+        .qr-header { font-size: 24px; font-weight: 800; color: var(--primary-pink); margin-bottom: 10px; }
+        .qr-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+        .qr-frame { 
+            background: var(--text-light); padding: 15px; border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.2); margin: 20px auto; max-width: 250px;
+        }
+        .qr-frame img { width: 100%; border-radius: 8px; }
+        .qr-amount { 
+            font-size: 32px; font-weight: 800; 
+            background: var(--gradient-1); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-top: 15px;
+        }
+        .qr-note { 
+            font-size: 12px; color: var(--text-muted); margin-top: 20px; 
+            padding: 10px; background: rgba(var(--primary-pink), 0.1); border-radius: 10px;
+            border: 1px solid rgba(var(--primary-pink), 0.2);
+        }
+        .qr-note strong { color: var(--primary-pink); }
+
+        /* Invoice Modal */
+        .inv-icon { 
+            background: var(--success-green); width: 60px; height: 60px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 20px; font-size: 30px; color: var(--text-light);
+            box-shadow: 0 0 20px rgba(var(--success-green), 0.5);
+        }
+        .inv-title { font-size: 26px; font-weight: 800; color: var(--success-green); margin-bottom: 10px; }
+        .inv-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+        
+        .inv-details-box { 
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            text-align: left;
+        }
+        .inv-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;
+        }
+        .inv-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .inv-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .inv-value { font-size: 15px; font-weight: 700; color: var(--text-light); }
+        .inv-value.pink { 
+            background: var(--gradient-1); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-weight: 800;
+        }
+
+        /* Animations */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="card">
-    <h2>1. Masukkan Username</h2>
-    <input type="text" id="user" placeholder="Username Roblox..." oninput="check()">
-  </div>
-
-  <div class="card">
-    <h2>2. Pilih Produk</h2>
-    <div class="grid" id="products"></div>
-  </div>
-
-  <div class="card">
-    <button id="payBtn" class="btn" disabled onclick="bayar()">BELI SEKARANG</button>
-  </div>
-</div>
-
-<div class="modal" id="modalQR">
-  <div class="modal-content">
-    <p style="font-size:13px">ID: <span id="idTrx" style="font-weight:bold"></span></p>
-    <div style="margin: 10px 0; border: 1px solid #eee; padding: 5px;"><img id="qrImg" src="" style="width:100%"></div>
-    <h3 id="amountQR">Rp 0</h3>
-    <p style="font-size:11px; color:red">Bayar sesuai nominal agar otomatis!</p>
-    <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Batal</button>
-  </div>
-</div>
-
-<div class="modal" id="modalInv">
-  <div class="modal-content">
-    <div style="color:green; font-size:40px">✔</div>
-    <h3 style="color:green">Berhasil Dibayar!</h3>
-    <div class="inv-box">
-      <div class="inv-row"><span>User:</span><span class="inv-val" id="resU"></span></div>
-      <div class="inv-row"><span>Item:</span><span class="inv-val" id="resI"></span></div>
-      <div class="inv-row"><span>ID:</span><span class="inv-val" id="resID"></span></div>
+    <div class="header">
+        <h1>Renzz Marketplace</h1>
+        <p>Top Up Robux Instan, Otomatis, dan Aman.</p>
     </div>
-    <button onclick="location.href=location.pathname" class="btn">SELESAI</button>
-  </div>
+
+    <div class="card">
+        <span class="input-label">PILIH NOMINAL ROBUX</span>
+        <div class="grid" id="productGrid"></div>
+    </div>
+
+    <div class="card">
+        <span class="input-label">USERNAME ROBLOX</span>
+        <input type="text" id="usernameInput" class="input-field" placeholder="Contoh: renzz_player" oninput="validateForm()">
+        <button id="payBtn" class="btn" disabled onclick="initiatePayment()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            BELI SEKARANG
+        </button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalQR">
+    <div class="modal-content">
+        <h2 class="qr-header">Selesaikan Pembayaran</h2>
+        <p class="qr-desc">Scan QRIS di bawah ini dengan aplikasi e-wallet Anda.</p>
+        
+        <div class="qr-frame">
+            <img id="qrImg" src="" alt="QRIS Code">
+        </div>
+        
+        <h3 class="qr-amount" id="qrAmount">Rp 0</h3>
+        
+        <p class="qr-note">
+            <strong>PENTING:</strong> Jangan tutup halaman ini! Sistem akan 
+            melakukan pengecekan otomatis setelah pembayaran berhasil.
+        </p>
+
+        <button class="btn-secondary" onclick="cancelPayment()">Batalkan Transaksi</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalInvoice">
+    <div class="modal-content">
+        <div class="inv-icon">✓</div>
+        <h2 class="inv-title">Pembayaran Berhasil!</h2>
+        <p class="inv-subtitle">Robux Anda sedang dalam proses pengiriman. Silakan simpan detail transaksi ini.</p>
+        
+        <div class="inv-details-box">
+            <div class="inv-row">
+                <span class="inv-label">Username</span>
+                <span class="inv-value" id="resUser"></span>
+            </div>
+            <div class="inv-row">
+                <span class="inv-label">Produk</span>
+                <span class="inv-value pink" id="resItem"></span>
+            </div>
+            <div class="inv-row">
+                <span class="inv-label">ID Transaksi</span>
+                <span class="inv-value" id="resInv"></span>
+            </div>
+        </div>
+
+        <button class="btn" onclick="closeInvoice()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
+            SELESAI
+        </button>
+    </div>
 </div>
 
 <script>
-  const API = "https://kepodeh.vercel.app";
-  const list = [
-    { id: 1, name: "100 ROBUX", price: 15000, stock: 10 },
-    { id: 2, name: "500 ROBUX", price: 75000, stock: 5 }
-  ];
+    const API_ENDPOINT = "https://kepodeh.vercel.app"; // Ganti dengan URL API Anda jika berbeda
+    
+    const productData = [
+        { id: 'r1', name: '100 ROBUX', price: 15000, stock: 50 },
+        { id: 'r2', name: '400 ROBUX', price: 58000, stock: 20 },
+        { id: 'r3', name: '800 ROBUX', price: 115000, stock: 10 },
+        { id: 'r4', name: '1700 ROBUX', price: 245000, stock: 5 },
+        { id: 'r5', name: '2500 ROBUX', price: 350000, stock: 0 } // Contoh produk habis
+    ];
 
-  let select = null;
-  let timer = null;
+    let selectedProduct = null;
+    let paymentCheckInterval = null;
 
-  function render() {
-    const box = document.getElementById('products');
-    box.innerHTML = '';
-    list.forEach(p => {
-      const d = document.createElement('div');
-      d.className = `item ${p.stock === 0 ? 'out' : ''} ${select?.id === p.id ? 'active' : ''}`;
-      d.innerHTML = `<b>${p.name}</b><br><small>Rp ${p.price.toLocaleString()}</small>`;
-      if(p.stock > 0) d.onclick = () => { select = p; render(); check(); };
-      box.appendChild(d);
-    });
-  }
+    // --- UI Rendering Functions ---
+    function renderProducts() {
+        const productGrid = document.getElementById('productGrid');
+        productGrid.innerHTML = ''; // Clear existing items
 
-  function check() {
-    const u = document.getElementById('user').value;
-    document.getElementById('payBtn').disabled = !(u && select);
-  }
+        productData.forEach(p => {
+            const itemDiv = document.createElement('div');
+            const isOutOfStock = p.stock <= 0;
+            
+            itemDiv.className = `item ${isOutOfStock ? 'out' : ''} ${selectedProduct?.id === p.id ? 'active' : ''}`;
+            itemDiv.innerHTML = `
+                <div class="p-name">${p.name}</div>
+                <div class="p-price">Rp ${p.price.toLocaleString()}</div>
+                <div class="p-stock">${isOutOfStock ? 'HABIS' : `Stok: ${p.stock}`}</div>
+            `;
 
-  async function bayar() {
-    const u = document.getElementById('user').value;
-    const inv = "RNV-" + Date.now();
-    document.getElementById('payBtn').disabled = true;
-    document.getElementById('payBtn').innerText = "Loading...";
-
-    try {
-      const r = await fetch(`${API}/api/create-qris`, {
-        method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ amount: select.price, order_id: inv })
-      });
-      const d = await r.json();
-      const p = d.payment || d;
-
-      document.getElementById('idTrx').innerText = inv;
-      document.getElementById('amountQR').innerText = "Rp " + select.price.toLocaleString();
-      document.getElementById('qrImg').src = p.code ? `https://app.pakasir.com/qris/${p.code}.png` : `https://quickchart.io/qr?text=${p.payment_number}`;
-      document.getElementById('modalQR').style.display = 'flex';
-
-      // Jalankan cek otomatis
-      timer = setInterval(async () => {
-        const res = await fetch(`${API}/api/transaction-detail?amount=${select.price}&order_id=${inv}`);
-        const st = await res.json();
-        if((st.status||"").toUpperCase().includes("SUCCESS")) {
-          clearInterval(timer);
-          showInv(u, select.name, inv);
-        }
-      }, 4000);
-    } catch(e) { alert("Error!"); location.reload(); }
-  }
-
-  function showInv(u, i, id) {
-    document.getElementById('modalQR').style.display = 'none';
-    document.getElementById('resU').innerText = u.toUpperCase();
-    document.getElementById('resI').innerText = i;
-    document.getElementById('resID').innerText = id;
-    document.getElementById('modalInv').style.display = 'flex';
-    confetti({ particleCount: 100, spread: 70 });
-
-    // Tambahkan ID ke URL agar bisa di-share
-    const newUrl = window.location.pathname + `?inv=${id}&user=${u}&item=${i}`;
-    window.history.pushState({}, '', newUrl);
-  }
-
-  // Cek kalau ada ID di link pas dibuka
-  window.onload = () => {
-    render();
-    const url = new URLSearchParams(window.location.search);
-    if(url.get('inv')) {
-      document.getElementById('resU').innerText = url.get('user').toUpperCase();
-      document.getElementById('resI').innerText = url.get('item');
-      document.getElementById('resID').innerText = url.get('inv');
-      document.getElementById('modalInv').style.display = 'flex';
+            if (!isOutOfStock) {
+                itemDiv.onclick = () => {
+                    selectedProduct = p;
+                    renderProducts(); // Re-render to update active state
+                    validateForm();
+                };
+            }
+            productGrid.appendChild(itemDiv);
+        });
     }
-  };
+
+    // --- Form Validation ---
+    function validateForm() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const payButton = document.getElementById('payBtn');
+        payButton.disabled = !(username && selectedProduct);
+    }
+
+    // --- Payment Flow Functions ---
+    async function initiatePayment() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const orderId = `RNV-${Date.now()}`; // Generate RNV transaction ID
+        const payButton = document.getElementById('payBtn');
+        
+        payButton.disabled = true;
+        payButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>MEMPROSES...`;
+        
+        try {
+            const response = await fetch(`${API_ENDPOINT}/api/create-qris`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: selectedProduct.price, order_id: orderId })
+            });
+            const data = await response.json();
+            const paymentDetails = data.payment || data; // Adapt to API response structure
+
+            document.getElementById('qrImg').src = paymentDetails.code 
+                ? `https://app.pakasir.com/qris/${paymentDetails.code}.png` 
+                : `https://quickchart.io/qr?text=${encodeURIComponent(paymentDetails.payment_number)}&size=400`;
+            document.getElementById('qrAmount').innerText = `Rp ${selectedProduct.price.toLocaleString()}`;
+            document.getElementById('modalQR').style.display = 'flex';
+
+            startPaymentPolling(orderId, selectedProduct.price, username, selectedProduct.name);
+
+        } catch (error) {
+            console.error("Error initiating payment:", error);
+            alert("Gagal memulai pembayaran. Coba lagi.");
+            payButton.disabled = false;
+            payButton.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>BELI SEKARANG`;
+        }
+    }
+
+    function startPaymentPolling(orderId, amount, username, itemName) {
+        paymentCheckInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/api/transaction-detail?amount=${amount}&order_id=${orderId}`);
+                const data = await response.json();
+                
+                // Check for successful payment status
+                if ((data.status || "").toUpperCase().includes("SUCCESS") || (data.status || "").toUpperCase().includes("BERHASIL")) {
+                    showSuccessInvoice(orderId, username, itemName);
+                }
+            } catch (error) {
+                console.error("Error checking payment status:", error);
+            }
+        }, 4000); // Check every 4 seconds
+    }
+
+    function showSuccessInvoice(orderId, username, itemName) {
+        clearInterval(paymentCheckInterval); // Stop polling
+        document.getElementById('modalQR').style.display = 'none'; // Close QR modal
+
+        // Populate invoice details
+        document.getElementById('resUser').innerText = username.toUpperCase();
+        document.getElementById('resItem').innerText = itemName;
+        document.getElementById('resInv').innerText = orderId;
+        
+        document.getElementById('modalInvoice').style.display = 'flex'; // Show invoice modal
+        
+        // Trigger confetti effect
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+        // Update URL for shareable invoice link
+        const shareableUrl = window.location.origin + window.location.pathname + `?inv=${orderId}&user=${username}&item=${itemName}`;
+        window.history.pushState({ path: shareableUrl }, '', shareableUrl);
+
+        // Deduct stock (simple client-side, ideally should be server-side)
+        const productIndex = productData.findIndex(p => p.name === itemName);
+        if (productIndex !== -1) {
+            productData[productIndex].stock -= 1;
+            renderProducts(); // Re-render to reflect new stock
+        }
+    }
+
+    function cancelPayment() {
+        if (confirm("Yakin ingin membatalkan transaksi ini?")) {
+            clearInterval(paymentCheckInterval);
+            location.reload(); // Reload to reset state
+        }
+    }
+
+    function closeInvoice() {
+        location.href = window.location.origin + window.location.pathname; // Go back to clean main page
+    }
+
+    // --- Initialization on Page Load ---
+    window.onload = () => {
+        renderProducts(); // Render products initially
+        
+        // Check if URL contains invoice parameters (for shareable links)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('inv')) {
+            document.getElementById('resUser').innerText = urlParams.get('user').toUpperCase();
+            document.getElementById('resItem').innerText = urlParams.get('item');
+            document.getElementById('resInv').innerText = urlParams.get('inv');
+            document.getElementById('modalInvoice').style.display = 'flex';
+        }
+    };
 </script>
+
+<style>
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 </body>
 </html>
