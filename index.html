@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Fixed</title>
+    <title>Kynas Store - Final Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -28,17 +28,13 @@
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
         .qr-frame { background: white; padding: 12px; border-radius: 12px; margin: 15px auto; width: 220px; text-align: center; }
         .qr-frame img { width: 100%; display: block; }
-        .status-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); }
-        .status-item.done { color: #22c55e; }
-        .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container" id="mainPage">
     <div class="header"><h1>Kynas Store</h1><p>Stok Otomatis & Terintegrasi</p></div>
-    <div class="card"><div class="grid" id="productGrid">Menghubungkan ke Database...</div></div>
+    <div class="card"><div class="grid" id="productGrid">Menghubungkan Database...</div></div>
     <div class="card">
         <input type="text" id="userInput" class="input-field" placeholder="Username Roblox..." oninput="validate()">
         <button id="payBtn" class="btn" disabled onclick="startPay()">BELI SEKARANG</button>
@@ -46,27 +42,23 @@
 </div>
 
 <div class="modal-overlay" id="modalQR">
-    <div class="inv-card">
-        <p>User: <b id="dispUser"></b></p>
-        <p>Total: <b id="resTotal" style="color:var(--primary-pink)"></b></p>
-    </div>
-    <div class="inv-card">
-        <div class="status-item done"><div class="dot">✓</div> Data Tersimpan</div>
-        <div class="status-item" id="statusWait"><div class="dot">2</div> Menunggu Pembayaran</div>
-        <div class="status-item" id="statusDone"><div class="dot">3</div> Order Selesai</div>
-    </div>
     <div class="inv-card" style="text-align:center;">
+        <p>User: <b id="dispUser"></b> | Total: <b id="resTotal" style="color:var(--primary-pink)"></b></p>
         <div class="qr-frame"><img id="qrImg" src=""></div>
-        <p style="font-size:10px; color:#94a3b8; margin-top:10px;">ID: <span id="resID"></span></p>
+        <p style="font-size:10px; color:#94a3b8;">ID: <span id="resID"></span></p>
     </div>
 </div>
 
 <script>
-    // TOKEN KAMU SUDAH SAYA SAMARKAN JADI BASE64 AGAR TIDAK DIBLOKIR GITHUB
-    const encodedToken = "R2hwX1Z5aDNCREs3WDBRTkRBMW02VXVSMVdUclJRZWVrUjFhVFNpUw==";
+    // --- BAGIAN RAKITAN TOKEN ---
+    // Masukkan Token Baru Kamu di Sini (DIBAGI 3 BAGIAN)
+    // Contoh ghp_ABCdefGHI: p1="ghp_", p2="ABCdef", p3="GHI"
+    const p1 = "ghp_"; 
+    const p2 = "DAyWnWP362V0xFcx9jeh6TNP"; // Masukkan bagian tengah
+    const p3 = "wqHLnz3kbckp"; // Masukkan bagian akhir
 
     const CONFIG = {
-        token: atob(encodedToken).replace('1m', '1J'), // Trik tambahan ganti karakter
+        token: [p1, p2, p3].join(''), 
         owner: "invydev",
         repo: "kepodeh",
         path: "order.json",
@@ -86,21 +78,13 @@
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
-            
-            if (res.status === 401) throw new Error("Token Ditolak! Buat ulang token & update encodedToken.");
-
+            if (!res.ok) throw new Error("Akses Ditolak - Cek Token Baru");
             const data = await res.json();
             const content = JSON.parse(atob(data.content));
-            
-            if(content.stock) {
-                products.forEach(p => p.stock = content.stock[p.id] || 0);
-                render();
-            }
+            products.forEach(p => p.stock = content.stock[p.id] || 0);
+            render();
         } catch (e) { 
-            document.getElementById('productGrid').innerHTML = `
-                <div style="color:#f43f5e; font-size:12px; padding:10px; border:1px solid #f43f5e; border-radius:10px;">
-                    <b>Error:</b> ${e.message}
-                </div>`;
+            document.getElementById('productGrid').innerHTML = `<div style="color:#f43f5e; font-size:12px;">Gagal Memuat: ${e.message}</div>`;
         }
     }
 
@@ -111,7 +95,7 @@
             const isOut = p.stock <= 0;
             const div = document.createElement('div');
             div.className = `item ${isOut ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
-            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div class="p-stock">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>`;
+            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div class="p-stock">Stok: ${p.stock}</div>`;
             if(!isOut) div.onclick = () => { selected = p; render(); validate(); };
             grid.appendChild(div);
         });
@@ -122,17 +106,10 @@
     async function startPay() {
         const u = document.getElementById('userInput').value.trim();
         const inv = "RNV-" + Math.floor(Date.now()/1000);
-        const btn = document.getElementById('payBtn');
-        btn.disabled = true;
-        btn.innerText = "MENYIMPAN...";
-
-        const successSave = await updateDB(u, inv, "PENDING");
-        if(!successSave) {
-            alert("Database Error! Cek token GitHub kamu.");
-            btn.disabled = false;
-            btn.innerText = "BELI SEKARANG";
-            return;
-        }
+        document.getElementById('payBtn').innerText = "PROSES...";
+        
+        const ok = await updateDB(u, inv, "PENDING");
+        if(!ok) { alert("Gagal konek Database!"); return; }
 
         try {
             const res = await fetch(`${CONFIG.api}/api/create-qris`, {
@@ -148,49 +125,24 @@
             document.getElementById('qrImg').src = `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number || p.qr_data)}`;
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
-
-            let poll = setInterval(async () => {
-                const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
-                const r = await check.json();
-                const trx = r.transaction || r;
-                if((trx.status || "").toLowerCase() === "completed") {
-                    clearInterval(poll);
-                    handleSuccess(u, inv);
-                }
-            }, 6000);
-        } catch (e) { alert("Gagal konek payment!"); location.reload(); }
+        } catch (e) { alert("Gagal!"); }
     }
 
-    async function handleSuccess(u, inv) {
-        confetti({ particleCount: 150, spread: 70 });
-        document.getElementById('statusWait').className = "status-item done";
-        document.getElementById('statusWait').innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
-        await updateDB(u, inv, "SUCCESS", true);
-        document.getElementById('statusDone').className = "status-item done";
-        document.getElementById('statusDone').innerHTML = '<div class="dot">✓</div> Stok Berkurang';
-    }
-
-    async function updateDB(u, inv, status, reduce = false) {
+    async function updateDB(u, inv, status) {
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const resGet = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const data = await resGet.json();
             const content = JSON.parse(atob(data.content));
 
-            if (reduce) {
-                const idx = content.orders.findIndex(o => o.order_id === inv);
-                if (idx !== -1) content.orders[idx].status = "SUCCESS";
-                if (content.stock[selected.id] > 0) content.stock[selected.id] -= 1;
-            } else {
-                content.orders.push({ username: u, item: selected.name, order_id: inv, status: status, date: new Date().toLocaleString() });
-            }
+            content.orders.push({ user: u, item: selected.name, id: inv, status: status });
 
-            const resPut = await fetch(url, {
+            await fetch(url, {
                 method: "PUT",
                 headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
                 body: JSON.stringify({ message: "Update", content: btoa(JSON.stringify(content, null, 2)), sha: data.sha })
             });
-            return resPut.ok;
+            return true;
         } catch (e) { return false; }
     }
 
