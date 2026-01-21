@@ -3,227 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Modern UI</title>
+    <title>Kynas Store - Modern Pink</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-pink: #f43f5e;
-            --secondary-pink: #ec4899; /* Slightly different pink for gradients */
-            --soft-pink: #fbcfe8; /* Lighter pink for accents */
-            --dark-bg: #111827; /* Darker background */
-            --card-bg: #1f2937; /* Slightly lighter dark for cards */
-            --text-light: #f9fafb;
-            --text-muted: #d1d5db;
-            --success-green: #22c55e;
-            --gradient-1: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
-            --gradient-2: linear-gradient(135deg, var(--secondary-pink), #f082e6);
+            --secondary-pink: #ec4899;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #f8fafc;
+            --gradient: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { 
-            background-color: var(--dark-bg); 
-            color: var(--text-light); 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh;
-            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="opacity:0.05;"><circle cx="20" cy="20" r="10" fill="%23f43f5e"/><circle cx="80" cy="50" r="15" fill="%23ec4899"/><circle cx="40" cy="90" r="8" fill="%23f43f5e"/></svg>');
-            background-size: 80% auto;
-            background-repeat: no-repeat;
-            background-position: top left;
-        }
-        .container { width: 100%; max-width: 480px; }
+        body { background-color: var(--dark-bg); color: var(--text-light); padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 400px; }
 
-        /* Header */
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { 
-            font-size: 28px; font-weight: 800; 
-            background: var(--gradient-1); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 10px;
-        }
-        .header p { font-size: 14px; color: var(--text-muted); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { font-size: 12px; color: #94a3b8; }
 
-        /* Card Base */
-        .card { 
-            background: var(--card-bg); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 18px; 
-            padding: 25px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
+        .card { background: var(--card-bg); border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
 
-        /* Product Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
+        /* Grid Produk Ramping */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .item { 
-            background: rgba(0,0,0,0.2); 
-            border: 1px solid transparent; 
-            border-radius: 15px; 
-            padding: 18px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            position: relative;
-            overflow: hidden;
+            background: rgba(0,0,0,0.2); border: 1px solid transparent; border-radius: 12px; 
+            padding: 12px; text-align: center; cursor: pointer; transition: 0.2s;
         }
-        .item::before { /* Border effect on hover */
-            content: ''; position: absolute; inset: 0; border-radius: 15px; padding: 1px; 
-            background: var(--gradient-1); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .item.active::before { opacity: 1; }
-        .item.active { 
-            background: rgba(var(--primary-pink), 0.1); 
-            box-shadow: 0 0 20px rgba(var(--primary-pink), 0.5); 
-            transform: translateY(-3px);
-        }
-        .item.out { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
-        .item.out::before { display: none; } /* Remove border for out of stock */
+        .item.active { border-color: var(--primary-pink); background: rgba(244, 63, 94, 0.1); transform: scale(0.98); }
+        .item.out { opacity: 0.5; filter: grayscale(1); }
+        .p-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+        .p-price { font-weight: 800; font-size: 14px; color: var(--primary-pink); }
+        .p-stock { font-size: 9px; color: #64748b; }
 
-        .p-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: var(--text-light); }
-        .p-price { 
-            font-weight: 800; font-size: 17px; 
-            background: var(--gradient-2); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
-        .p-stock { font-size: 10px; color: var(--text-muted); margin-top: 5px; }
-
-        /* Input Styles */
-        .input-group { margin-bottom: 20px; }
-        .input-label { 
-            display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; 
-            color: var(--soft-pink); text-transform: uppercase; letter-spacing: 0.5px;
-        }
+        /* Input & Button Proporsional */
+        .input-label { font-size: 11px; font-weight: 700; color: var(--secondary-pink); text-transform: uppercase; margin-bottom: 8px; display: block; }
         .input-field { 
-            width: 100%; padding: 15px; background: rgba(0,0,0,0.3); 
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; 
-            color: var(--text-light); font-size: 15px; outline: none; 
-            transition: all 0.3s ease;
+            width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; 
+            border-radius: 10px; color: white; font-size: 13px; outline: none; margin-bottom: 15px;
         }
-        .input-field:focus { 
-            border-color: var(--primary-pink); 
-            box-shadow: 0 0 0 3px rgba(var(--primary-pink), 0.3); 
-        }
+        .input-field:focus { border-color: var(--primary-pink); }
 
-        /* Buttons */
+        /* Tombol yang diperkecil */
         .btn { 
-            width: 100%; padding: 16px; border-radius: 30px; font-weight: 700; 
-            font-size: 16px; cursor: pointer; transition: all 0.3s ease; 
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: var(--gradient-1); border: none; color: var(--text-light);
-            box-shadow: 0 8px 20px rgba(var(--primary-pink), 0.4);
+            width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; 
+            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--gradient); border: none; color: white;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
         }
-        .btn:disabled { 
-            background: #475569; 
-            cursor: not-allowed; 
-            box-shadow: none; 
-            opacity: 0.7; 
-        }
-        .btn-secondary {
-            background: none; border: none; color: var(--text-muted); 
-            font-size: 13px; margin-top: 15px; cursor: pointer; transition: color 0.3s ease;
-        }
-        .btn-secondary:hover { color: var(--primary-pink); }
+        .btn:disabled { background: #475569; box-shadow: none; opacity: 0.6; cursor: not-allowed; }
 
-        /* Modal Base */
-        .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
-            display: none; align-items: center; justify-content: center; z-index: 100; 
-            padding: 20px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        }
-        .modal-content { 
-            background: var(--card-bg); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 25px; 
-            padding: 30px; 
-            width: 100%; max-width: 400px; 
-            text-align: center; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            animation: fadeInScale 0.3s ease-out;
-        }
-
-        /* QR Modal */
-        .qr-header { font-size: 24px; font-weight: 800; color: var(--primary-pink); margin-bottom: 10px; }
-        .qr-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
-        .qr-frame { 
-            background: var(--text-light); padding: 15px; border-radius: 15px; 
-            border: 1px solid rgba(255,255,255,0.2); margin: 20px auto; max-width: 250px;
-        }
-        .qr-frame img { width: 100%; border-radius: 8px; }
-        .qr-amount { 
-            font-size: 32px; font-weight: 800; 
-            background: var(--gradient-1); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-top: 15px;
-        }
-        .qr-note { 
-            font-size: 12px; color: var(--text-muted); margin-top: 20px; 
-            padding: 10px; background: rgba(var(--primary-pink), 0.1); border-radius: 10px;
-            border: 1px solid rgba(var(--primary-pink), 0.2);
-        }
-        .qr-note strong { color: var(--primary-pink); }
-
-        /* Invoice Modal */
-        .inv-icon { 
-            background: var(--success-green); width: 60px; height: 60px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            margin: 0 auto 20px; font-size: 30px; color: var(--text-light);
-            box-shadow: 0 0 20px rgba(var(--success-green), 0.5);
-        }
-        .inv-title { font-size: 26px; font-weight: 800; color: var(--success-green); margin-bottom: 10px; }
-        .inv-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+        /* Modal & Invoice */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-bg); border-radius: 20px; padding: 20px; width: 100%; max-width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         
-        .inv-details-box { 
-            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); 
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
-            text-align: left;
-        }
-        .inv-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;
-        }
-        .inv-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .inv-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .inv-value { font-size: 15px; font-weight: 700; color: var(--text-light); }
-        .inv-value.pink { 
-            background: var(--gradient-1); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            font-weight: 800;
-        }
+        .qr-frame { background: white; padding: 8px; border-radius: 10px; margin: 15px auto; width: 180px; }
+        .qr-frame img { width: 100%; display: block; }
+        .qr-amount { font-size: 22px; font-weight: 800; color: var(--primary-pink); }
 
-        /* Animations */
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        .inv-details { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; text-align: left; margin: 15px 0; font-size: 12px; }
+        .inv-row { display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .inv-val { font-weight: 700; color: var(--primary-pink); }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>Renzz Marketplace</h1>
-        <p>Top Up Robux Instan, Otomatis, dan Aman.</p>
+        <h1>Kynas Store</h1>
+        <p>Proses otomatis & instan</p>
     </div>
 
     <div class="card">
-        <span class="input-label">PILIH NOMINAL ROBUX</span>
+        <span class="input-label">Pilih Produk</span>
         <div class="grid" id="productGrid"></div>
     </div>
 
     <div class="card">
-        <span class="input-label">USERNAME ROBLOX</span>
-        <input type="text" id="usernameInput" class="input-field" placeholder="Contoh: renzz_player" oninput="validateForm()">
-        <button id="payBtn" class="btn" disabled onclick="initiatePayment()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+        <span class="input-label">Data Akun</span>
+        <input type="text" id="userInput" class="input-field" placeholder="Username Roblox..." oninput="validate()">
+        <button id="payBtn" class="btn" disabled onclick="startPay()">
+            BELI SEKARANG
+        </button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalQR">
+    <div class="modal-content">
+        <h3 style="font-size: 16px;">Scan Pembayaran</h3>
+        <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
+        <div class="qr-amount" id="qrAmount">Rp 0</div>
+        <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">ID: <span id="resID"></span></p>
+        <button onclick="location.reload()" style="background:none; border:none; color:#ef4444; font-size:11px; margin-top:15px; cursor:pointer;">Batalkan</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalInv">
+    <div class="modal-content">
+        <div style="background:#22c55e; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">✓</div>
+        <h2 style="color:#22c55e; font-size:18px;">Berhasil!</h2>
+        <div class="inv-details">
+            <div class="inv-row"><span>User</span><span class="inv-val" id="invUser"></span></div>
+            <div class="inv-row"><span>Item</span><span class="inv-val" id="invItem"></span></div>
+            <div class="inv-row"><span>ID</span><span id="invID" style="font-size:10px; opacity:0.7;"></span></div>
+        </div>
+        <button onclick="location.href=location.pathname" class="btn">SELESAI</button>
+    </div>
+</div>
+
+<script>
+    const API = "https://kepodeh.vercel.app";
+    const products = [
+        { id: '1', name: '100 ROBUX', price: 15000, stock: 10 },
+        { id: '2', name: '500 ROBUX', price: 70000, stock: 5 },
+        { id: '3', name: '1000 ROBUX', price: 135000, stock: 0 }
+    ];
+
+    let selected = null;
+    let poll = null;
+
+    function render() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        products.forEach(p => {
+            const div = document.createElement('div');
+            const isOut = p.stock === 0;
+            div.className = `item ${isOut ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
+            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div class="p-stock">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>`;
+            if(!isOut) div.onclick = () => { selected = p; render(); validate(); };
+            grid.appendChild(div);
+        });
+    }
+
+    function validate() {
+        const u = document.getElementById('userInput').value.trim();
+        document.getElementById('payBtn').disabled = !(u && selected);
+    }
+
+    async function startPay() {
+        const u = document.getElementById('userInput').value.trim();
+        const inv = "RNV-" + Date.now();
+        const btn = document.getElementById('payBtn');
+        
+        btn.disabled = true;
+        btn.innerHTML = `<div class="spinner"></div> PROSES...`;
+
+        try {
+            const res = await fetch(`${API}/api/create-qris`, {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ amount: selected.price, order_id: inv })
+            });
+            const d = await res.json();
+            const p = d.payment || d;
+
+            document.getElementById('qrImg').src = p.code ? `https://app.pakasir.com/qris/${p.code}.png` : `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number)}`;
+            document.getElementById('qrAmount').innerText = "Rp " + selected.price.toLocaleString();
+            document.getElementById('resID').innerText = inv;
+            document.getElementById('modalQR').style.display = 'flex';
+
+            poll = setInterval(async () => {
+                const check = await fetch(`${API}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
+                const resCheck = await check.json();
+                if((resCheck.status||"").toUpperCase().includes("SUCCESS")) {
+                    clearInterval(poll);
+                    showSuccess(u, selected.name, inv);
+                }
+            }, 4000);
+        } catch (e) { alert("Gagal!"); location.reload(); }
+    }
+
+    function showSuccess(u, item, id) {
+        document.getElementById('modalQR').style.display = 'none';
+        document.getElementById('invUser').innerText = u.toUpperCase();
+        document.getElementById('invItem').innerText = item;
+        document.getElementById('invID').innerText = id;
+        document.getElementById('modalInv').style.display = 'flex';
+        confetti({ particleCount: 100, spread: 70 });
+        
+        const newUrl = window.location.pathname + `?inv=${id}&user=${u}&item=${item}`;
+        window.history.pushState({}, '', newUrl);
+    }
+
+    window.onload = () => {
+        render();
+        const url = new URLSearchParams(window.location.search);
+        if(url.get('inv')) {
+            showSuccess(url.get('user'), url.get('item'), url.get('inv'));
+        }
+    };
+</script>
+</body>
+</html>
+1 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             BELI SEKARANG
         </button>
     </div>
