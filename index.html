@@ -127,7 +127,6 @@
 </div>
 
 <script>
-    // --- KONFIGURASI GITHUB (WAJIB DIISI) ---
     const CONFIG = {
         token: "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", 
         owner: "invydev",
@@ -138,7 +137,7 @@
 
     const products = [
         { id: '1', name: '100 ROBUX', price: 500, stock: 1 },
-        { id: '2', name: '500 ROBUX', price: 70000, stock: 5 },
+        { id: '2', name: '500 ROBUX', price: 70000, stock: 99 },
         { id: '3', name: '1000 ROBUX', price: 135000, stock: 0 }
     ];
 
@@ -187,52 +186,48 @@
 
             startTimer(300);
 
-            // POLLING CEK STATUS
+            // LOGIKA POLLING YANG DIPERBAIKI (CEK "COMPLETED")
             poll = setInterval(async () => {
                 try {
                     const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
                     const resCheck = await check.json();
                     
-                    // VALIDASI KETAT: Status harus SUCCESS atau SETTLED
-                    const status = (resCheck.status || "").toUpperCase();
-                    if(status.includes("SUCCESS") || status.includes("SETTLED")) {
+                    // Cek di dalam object transaction (sesuai screenshot kamu)
+                    const trx = resCheck.transaction || resCheck;
+                    const status = (trx.status || "").toLowerCase();
+
+                    // Menerima completed, success, atau settled
+                    if(status === "completed" || status === "success" || status === "settled") {
                         clearInterval(poll);
                         clearInterval(timerInterval);
                         handleSuccess(u, selected.name, inv);
                     }
                 } catch (e) { console.log("Re-checking..."); }
-            }, 5000);
-        } catch (e) { alert("Gagal membuat pembayaran!"); location.reload(); }
+            }, 6000); 
+        } catch (e) { alert("Gagal!"); location.reload(); }
     }
 
     async function handleSuccess(username, item, id) {
-        document.getElementById('btnBatal').style.display = 'none'; // Sembunyikan tombol batal
-        
+        document.getElementById('btnBatal').style.display = 'none';
         const sWait = document.getElementById('statusWait');
         const sProc = document.getElementById('statusProcess');
         sWait.className = "status-item done"; sWait.innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
         sProc.className = "status-item active";
         confetti({ particleCount: 150, spread: 70 });
 
-        // LOGIKA GITHUB: Ambil, Update, Simpan
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const getFile = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const fileData = await getFile.json();
-            
-            // Decode content dengan benar (handling UTF-8)
             const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
             
-            // Cek agar tidak duplikat di JSON
-            const isExist = currentContent.orders.some(o => o.order_id === id);
-            if(!isExist) {
+            if(!currentContent.orders.some(o => o.order_id === id)) {
                 currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString('id-ID') });
-
                 await fetch(url, {
                     method: "PUT",
                     headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        message: `New Order: ${username}`,
+                        message: `Order: ${username}`,
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
                         sha: fileData.sha
                     })
@@ -250,22 +245,11 @@
         timerInterval = setInterval(() => {
             let m = Math.floor(t / 60), s = t % 60;
             document.getElementById('countdown').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if (--t < 0) { 
-                clearInterval(timerInterval); 
-                clearInterval(poll);
-                alert("Waktu Habis!");
-                location.reload(); 
-            }
+            if (--t < 0) { clearInterval(poll); location.reload(); }
         }, 1000);
     }
 
-    function konfirmasiBatal() { 
-        if(confirm("Apakah Anda yakin ingin membatalkan pesanan?")) {
-            clearInterval(poll);
-            clearInterval(timerInterval);
-            location.reload();
-        }
-    }
+    function konfirmasiBatal() { if(confirm("Yakin ingin membatalkan?")) location.reload(); }
     window.onload = render;
 </script>
 </body>
