@@ -3,82 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Auto Update</title>
+    <title>Kynas Store - Auto Stock</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-pink: #f43f5e;
-            --secondary-pink: #ec4899;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --gradient: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
-        }
-
+        :root { --primary-pink: #f43f5e; --secondary-pink: #ec4899; --dark-bg: #0f172a; --card-bg: #1e293b; --text-light: #f8fafc; --text-muted: #94a3b8; --gradient: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink)); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--dark-bg); color: var(--text-light); padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 400px; }
-
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { font-size: 22px; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header p { font-size: 12px; color: #94a3b8; }
-
         .card { background: var(--card-bg); border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .item { 
-            background: rgba(0,0,0,0.2); border: 1px solid transparent; border-radius: 12px; 
-            padding: 12px; text-align: center; cursor: pointer; transition: 0.2s;
-        }
-        .item.active { border-color: var(--primary-pink); background: rgba(244, 63, 94, 0.1); transform: scale(0.98); }
-        .item.out { opacity: 0.5; filter: grayscale(1); }
-        .p-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
-        .p-price { font-weight: 800; font-size: 14px; color: var(--primary-pink); }
-
-        .input-field { 
-            width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; 
-            border-radius: 10px; color: white; font-size: 13px; outline: none; margin-bottom: 15px;
-        }
-
-        .btn { 
-            width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; 
-            cursor: pointer; background: var(--gradient); border: none; color: white;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        }
+        .item { background: rgba(0,0,0,0.2); border: 1px solid transparent; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .item.active { border-color: var(--primary-pink); background: rgba(244, 63, 94, 0.1); }
+        .item.out { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+        .p-name { font-weight: 700; font-size: 13px; }
+        .p-price { font-weight: 800; color: var(--primary-pink); }
+        .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 15px; outline: none; }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; background: var(--gradient); border: none; color: white; cursor: pointer; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.98); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        
-        .timer-box { 
-            background: rgba(244, 63, 94, 0.1); border: 1px solid var(--primary-pink);
-            color: var(--primary-pink); padding: 10px; border-radius: 10px;
-            text-align: center; font-weight: 800; margin-bottom: 15px;
-        }
-
-        .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 14px; color: var(--text-muted); }
-        .status-item.done { color: var(--text-light); }
-        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; }
-        .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 12px; }
-
-        .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 15px auto; width: 200px; text-align: center; }
+        .qr-frame { background: white; padding: 12px; border-radius: 12px; margin: 15px auto; width: 220px; }
         .qr-frame img { width: 100%; display: block; }
+        .status-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); }
+        .status-item.done { color: #22c55e; }
     </style>
 </head>
 <body>
 
 <div class="container" id="mainPage">
-    <div class="header">
-        <h1>Kynas Store</h1>
-        <p>Proses otomatis & instan</p>
-    </div>
-
-    <div class="card">
-        <div class="grid" id="productGrid"></div>
-    </div>
-
+    <div class="header"><h1>Kynas Store</h1><p>Stok Otomatis & Real-time</p></div>
+    <div class="card"><div class="grid" id="productGrid">Memuat Stok...</div></div>
     <div class="card">
         <input type="text" id="userInput" class="input-field" placeholder="Username Roblox..." oninput="validate()">
         <button id="payBtn" class="btn" disabled onclick="startPay()">BELI SEKARANG</button>
@@ -87,27 +44,21 @@
 
 <div class="modal-overlay" id="modalQR">
     <div class="inv-card">
-        <div class="timer-box">Selesaikan Dalam: <span id="countdown">05:00</span></div>
-        <p>Username: <b id="dispUser"></b></p>
+        <p>User: <b id="dispUser"></b></p>
         <p>Total: <b id="resTotal" style="color:var(--primary-pink)"></b></p>
     </div>
-
     <div class="inv-card">
-        <ul class="status-list">
-            <li class="status-item done"><div class="dot">✓</div> Order Dibuat</li>
-            <li class="status-item" id="statusWait"><div class="dot"></div> Menunggu Pembayaran</li>
-            <li class="status-item" id="statusDone"><div class="dot"></div> Order Selesai</li>
-        </ul>
+        <div class="status-item done">✓ Data Tersimpan</div>
+        <div class="status-item" id="statusWait">⏳ Menunggu Pembayaran</div>
+        <div class="status-item" id="statusDone">⚪ Selesai</div>
     </div>
-
     <div class="inv-card" style="text-align:center;">
-        <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
-        <p style="font-size:10px; color:#94a3b8;">ID: <span id="resID"></span></p>
+        <div class="qr-frame"><img id="qrImg" src=""></div>
+        <p style="font-size:10px;">ID: <span id="resID"></span></p>
     </div>
 </div>
 
 <script>
-    // --- KONFIGURASI SUDAH TERISI ---
     const CONFIG = {
         token: "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", 
         owner: "invydev",
@@ -116,33 +67,52 @@
         api: "https://kepodeh.vercel.app"
     };
 
-    const products = [
-        { id: '1', name: '100 ROBUX', price: 15000, stock: 10 },
-        { id: '2', name: '500 ROBUX', price: 70000, stock: 5 }
+    let products = [
+        { id: '1', name: '100 ROBUX', price: 15000, stock: 0 },
+        { id: '2', name: '500 ROBUX', price: 70000, stock: 0 },
+        { id: '3', name: '1000 ROBUX', price: 135000, stock: 0 }
     ];
 
-    let selected = null, poll = null, timerInterval = null;
+    let selected = null;
+
+    // AMBIL STOK DARI GITHUB SAAT WEB DIBUKA
+    async function loadStock() {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+                headers: { "Authorization": `token ${CONFIG.token}` }
+            });
+            const data = await res.json();
+            const content = JSON.parse(atob(data.content));
+            
+            products.forEach(p => {
+                p.stock = content.stock[p.id] || 0;
+            });
+            render();
+        } catch (e) { console.error("Gagal ambil stok"); }
+    }
 
     function render() {
         const grid = document.getElementById('productGrid');
         grid.innerHTML = '';
         products.forEach(p => {
             const div = document.createElement('div');
-            div.className = `item ${p.stock === 0 ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
-            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div>`;
-            if(p.stock > 0) div.onclick = () => { selected = p; render(); validate(); };
+            const isOut = p.stock <= 0;
+            div.className = `item ${isOut ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
+            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div style="font-size:10px">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>`;
+            if(!isOut) div.onclick = () => { selected = p; render(); validate(); };
             grid.appendChild(div);
         });
     }
 
-    function validate() {
-        document.getElementById('payBtn').disabled = !(document.getElementById('userInput').value.trim() && selected);
-    }
+    function validate() { document.getElementById('payBtn').disabled = !(document.getElementById('userInput').value.trim() && selected); }
 
     async function startPay() {
         const u = document.getElementById('userInput').value.trim();
-        const inv = "RNV-" + Date.now();
+        const inv = "RNV-" + Math.floor(Date.now()/1000);
         document.getElementById('payBtn').disabled = true;
+
+        // 1. Simpan Awal (Pending)
+        await updateDatabase(u, inv, "PENDING");
 
         try {
             const res = await fetch(`${CONFIG.api}/api/create-qris`, {
@@ -154,70 +124,57 @@
 
             document.getElementById('dispUser').innerText = u;
             document.getElementById('resTotal').innerText = "Rp " + (selected.price + 338).toLocaleString();
-            document.getElementById('resID').innerText = inv;
             document.getElementById('qrImg').src = `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number || p.qr_data)}`;
-            
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
 
-            startTimer(300);
-
-            // POLLING CEK STATUS (FIXED UNTUK "COMPLETED")
-            poll = setInterval(async () => {
-                try {
-                    const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
-                    const resCheck = await check.json();
-                    
-                    // Cek status di dalam objek transaction sesuai screenshot kamu
-                    const trx = resCheck.transaction || resCheck;
-                    const status = (trx.status || "").toLowerCase();
-
-                    if(status === "completed" || status === "success") {
-                        clearInterval(poll);
-                        clearInterval(timerInterval);
-                        handleSuccess(u, selected.name, inv);
-                    }
-                } catch (e) {}
-            }, 5000);
+            let poll = setInterval(async () => {
+                const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
+                const r = await check.json();
+                const trx = r.transaction || r;
+                if((trx.status || "").toLowerCase() === "completed") {
+                    clearInterval(poll);
+                    handleSuccess(u, inv);
+                }
+            }, 6000);
         } catch (e) { alert("Gagal!"); location.reload(); }
     }
 
-    async function handleSuccess(username, item, id) {
-        document.getElementById('statusWait').className = "status-item done";
-        document.getElementById('statusWait').innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
-        document.getElementById('statusDone').className = "status-item done";
+    async function handleSuccess(u, inv) {
         confetti({ particleCount: 150, spread: 70 });
+        document.getElementById('statusWait').className = "status-item done";
+        document.getElementById('statusWait').innerText = "✓ Pembayaran Berhasil";
+        // 2. Update Jadi Success & Kurangi Stok
+        await updateDatabase(u, inv, "SUCCESS", true);
+        document.getElementById('statusDone').className = "status-item done";
+        document.getElementById('statusDone').innerText = "✓ Stok Berkurang & Selesai";
+    }
 
-        // SIMPAN KE GITHUB
+    async function updateDatabase(u, inv, status, reduceStock = false) {
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const getFile = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const fileData = await getFile.json();
-            const currentContent = JSON.parse(atob(fileData.content));
-            
-            currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString() });
+            const content = JSON.parse(atob(fileData.content));
+
+            if (reduceStock) {
+                const idx = content.orders.findIndex(o => o.order_id === inv);
+                if (idx !== -1) content.orders[idx].status = "SUCCESS";
+                // Kurangi stok permanen
+                if (content.stock[selected.id] > 0) content.stock[selected.id] -= 1;
+            } else {
+                content.orders.push({ username: u, item: selected.name, order_id: inv, status: status, date: new Date().toLocaleString() });
+            }
 
             await fetch(url, {
                 method: "PUT",
                 headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message: `New Order: ${username}`,
-                    content: btoa(JSON.stringify(currentContent, null, 2)),
-                    sha: fileData.sha
-                })
+                body: JSON.stringify({ message: "Update Database", content: btoa(JSON.stringify(content, null, 2)), sha: fileData.sha })
             });
-            console.log("Order saved to GitHub!");
-        } catch (e) { console.error("GitHub Save Error:", e); }
+        } catch (e) { console.error(e); }
     }
 
-    function startTimer(t) {
-        timerInterval = setInterval(() => {
-            let m = Math.floor(t / 60), s = t % 60;
-            document.getElementById('countdown').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if (--t < 0) { clearInterval(poll); location.reload(); }
-        }, 1000);
-    }
-    window.onload = render;
+    window.onload = loadStock;
 </script>
 </body>
 </html>
