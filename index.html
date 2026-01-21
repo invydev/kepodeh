@@ -27,7 +27,6 @@
 
         .card { background: var(--card-bg); border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
 
-        /* Grid Produk */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .item { 
             background: rgba(0,0,0,0.2); border: 1px solid transparent; border-radius: 12px; 
@@ -39,7 +38,6 @@
         .p-price { font-weight: 800; font-size: 14px; color: var(--primary-pink); }
         .p-stock { font-size: 9px; color: #64748b; }
 
-        /* Input & Button */
         .input-label { font-size: 11px; font-weight: 700; color: var(--secondary-pink); text-transform: uppercase; margin-bottom: 8px; display: block; }
         .input-field { 
             width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; 
@@ -55,7 +53,6 @@
         }
         .btn:disabled { background: #475569; box-shadow: none; opacity: 0.6; cursor: not-allowed; }
 
-        /* --- TAMPILAN INVOICE --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
         .inv-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
@@ -125,7 +122,7 @@
     <div class="inv-card" style="text-align:center;">
         <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
         <p style="font-size:10px; color:#94a3b8; margin-top:15px;">ID: <span id="resID"></span></p>
-        <button onclick="konfirmasiBatal()" style="background:none; border:none; color:#ef4444; font-size:12px; margin-top:20px; cursor:pointer; font-weight:700;">BATALKAN PESANAN</button>
+        <button onclick="konfirmasiBatal()" id="btnBatal" style="background:none; border:none; color:#ef4444; font-size:12px; margin-top:20px; cursor:pointer; font-weight:700;">BATALKAN PESANAN</button>
     </div>
 </div>
 
@@ -190,48 +187,59 @@
 
             startTimer(300);
 
+            // POLLING CEK STATUS
             poll = setInterval(async () => {
-                const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
-                const resCheck = await check.json();
-                if((resCheck.status||"").toUpperCase().includes("SUCCESS")) {
-                    clearInterval(poll);
-                    clearInterval(timerInterval);
-                    handleSuccess(u, selected.name, inv);
-                }
-            }, 4000);
-        } catch (e) { alert("Gagal!"); location.reload(); }
+                try {
+                    const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
+                    const resCheck = await check.json();
+                    
+                    // VALIDASI KETAT: Status harus SUCCESS atau SETTLED
+                    const status = (resCheck.status || "").toUpperCase();
+                    if(status.includes("SUCCESS") || status.includes("SETTLED")) {
+                        clearInterval(poll);
+                        clearInterval(timerInterval);
+                        handleSuccess(u, selected.name, inv);
+                    }
+                } catch (e) { console.log("Re-checking..."); }
+            }, 5000);
+        } catch (e) { alert("Gagal membuat pembayaran!"); location.reload(); }
     }
 
     async function handleSuccess(username, item, id) {
-        // 1. Update UI Status
+        document.getElementById('btnBatal').style.display = 'none'; // Sembunyikan tombol batal
+        
         const sWait = document.getElementById('statusWait');
         const sProc = document.getElementById('statusProcess');
         sWait.className = "status-item done"; sWait.innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
         sProc.className = "status-item active";
         confetti({ particleCount: 150, spread: 70 });
 
-        // 2. Simpan Otomatis ke order.json di GitHub
+        // LOGIKA GITHUB: Ambil, Update, Simpan
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const getFile = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const fileData = await getFile.json();
             
-            const currentContent = JSON.parse(atob(fileData.content));
-            currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString() });
+            // Decode content dengan benar (handling UTF-8)
+            const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+            
+            // Cek agar tidak duplikat di JSON
+            const isExist = currentContent.orders.some(o => o.order_id === id);
+            if(!isExist) {
+                currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString('id-ID') });
 
-            await fetch(url, {
-                method: "PUT",
-                headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message: `New Order: ${username}`,
-                    content: btoa(JSON.stringify(currentContent, null, 2)),
-                    sha: fileData.sha
-                })
-            });
-            console.log("Data order tersimpan di order.json");
-        } catch (e) { console.error("Gagal simpan JSON:", e); }
+                await fetch(url, {
+                    method: "PUT",
+                    headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message: `New Order: ${username}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
+                        sha: fileData.sha
+                    })
+                });
+            }
+        } catch (e) { console.error("Database Error:", e); }
 
-        // 3. Finalisasi Status
         setTimeout(() => {
             sProc.className = "status-item done"; sProc.innerHTML = '<div class="dot">✓</div> Order Diproses';
             document.getElementById('statusDone').className = "status-item done";
@@ -242,11 +250,22 @@
         timerInterval = setInterval(() => {
             let m = Math.floor(t / 60), s = t % 60;
             document.getElementById('countdown').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if (--t < 0) { clearInterval(timerInterval); location.reload(); }
+            if (--t < 0) { 
+                clearInterval(timerInterval); 
+                clearInterval(poll);
+                alert("Waktu Habis!");
+                location.reload(); 
+            }
         }, 1000);
     }
 
-    function konfirmasiBatal() { if(confirm("Batal?")) location.reload(); }
+    function konfirmasiBatal() { 
+        if(confirm("Apakah Anda yakin ingin membatalkan pesanan?")) {
+            clearInterval(poll);
+            clearInterval(timerInterval);
+            location.reload();
+        }
+    }
     window.onload = render;
 </script>
 </body>
