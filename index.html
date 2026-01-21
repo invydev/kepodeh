@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Realtime</title>
+    <title>Kynas Store - Official</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -33,16 +33,15 @@
         .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 10px auto; width: 200px; }
         .qr-frame img { width: 100%; display: block; }
 
-        /* REALTIME ANIMATION */
+        /* ANIMASI REALTIME */
         .status-list { margin-top: 5px; }
-        .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 13px; color: var(--text-muted); transition: 0.3s; }
+        .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 13px; color: var(--text-muted); }
         .dot { width: 22px; height: 22px; border: 2px solid #334155; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
         .status-item.done { color: #22c55e; }
         .status-item.done .dot { border-color: #22c55e; background: #22c55e; color: #000; }
         .status-item.current { color: #fff; font-weight: 600; }
         .status-item.current .dot { border-color: #f59e0b; position: relative; }
         .status-item.current .dot::after { content: ''; position: absolute; inset: -4px; border: 2px solid #f59e0b; border-radius: 50%; animation: pulse 1.2s infinite; }
-        
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
     </style>
 </head>
@@ -60,10 +59,11 @@
 <div class="modal-overlay" id="modalQR">
     <div class="inv-card">
         <h3 style="font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; color: var(--primary-pink);">Detail Pembayaran</h3>
-        <div class="row"><span class="row-label">Harga</span><span class="row-value" id="dispHarga"></span></div>
-        <div class="row"><span class="row-label">Pesanan</span><span class="row-value" id="dispItem"></span></div>
-        <div class="row"><span class="row-label">Username</span><span class="row-value" id="dispUser" style="color: #22c55e;"></span></div>
-        <div class="row"><span class="row-label">Jumlah</span><span class="row-value">1x</span></div>
+        <div class="row"><span class="row-label">1. Harga</span><span class="row-value" id="dispHarga"></span></div>
+        <div class="row"><span class="row-label">2. Pesanan</span><span class="row-value" id="dispItem"></span></div>
+        <div class="row"><span class="row-label">3. Username</span><span class="row-value" id="dispUser" style="color: #22c55e;"></span></div>
+        <div class="row"><span class="row-label">4. Jumlah</span><span class="row-value">1x</span></div>
+        <div class="row"><span class="row-label">Admin</span><span class="row-value">Rp 338</span></div>
         <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px dashed #475569; margin-top: 5px;">
             <span style="font-weight: 800;">TOTAL BAYAR</span>
             <span style="color: var(--primary-pink); font-weight: 800; font-size: 18px;" id="resTotal"></span>
@@ -76,7 +76,7 @@
             <div class="status-item done"><div class="dot">✓</div> Order Dibuat</div>
             <div class="status-item current" id="s-wait"><div class="dot"></div> Menunggu Pembayaran</div>
             <div class="status-item" id="s-process"><div class="dot"></div> Order Diproses</div>
-            <div class="status-item" id="s-done"><div class="dot"></div> Order Selesai</div>
+            <div class="status-item" id="s-done"><div class="dot"></div> Selesai</div>
         </div>
     </div>
 
@@ -118,7 +118,7 @@
             const content = JSON.parse(atob(data.content));
             products.forEach(p => p.stock = content.stock[p.id] || 0);
             render();
-        } catch (e) { console.log("Load stock failed"); }
+        } catch (e) { console.log("DB Error"); }
     }
 
     function render() {
@@ -137,11 +137,11 @@
     function validate() { document.getElementById('payBtn').disabled = !(document.getElementById('userInput').value.trim() && selected); }
 
     function startTimer(duration) {
-        let timer = duration, minutes, seconds;
+        let timer = duration, min, sec;
         const display = document.querySelector('#timer');
         const itv = setInterval(() => {
-            minutes = parseInt(timer / 60, 10); seconds = parseInt(timer % 60, 10);
-            display.textContent = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+            min = parseInt(timer / 60, 10); sec = parseInt(timer % 60, 10);
+            display.textContent = (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
             if (--timer < 0) { clearInterval(itv); location.reload(); }
         }, 1000);
     }
@@ -171,23 +171,21 @@
             document.getElementById('modalQR').style.display = 'flex';
             startTimer(300);
             
-            // CEK TRANSAKSI
+            // Loop Cek Status
             let check = setInterval(async () => {
                 const r = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
                 const data = await r.json();
-                const trx = data.transaction || data;
-                if((trx.status || "").toLowerCase() === "completed") {
+                if((data.transaction?.status || "").toLowerCase() === "completed") {
                     clearInterval(check);
                     handleSuccess(u, inv);
                 }
             }, 7000);
 
-        } catch (e) { alert("Sistem Sibuk!"); }
+        } catch (e) { alert("Gagal mengambil QRIS"); }
     }
 
     async function handleSuccess(u, inv) {
         confetti({ particleCount: 150, spread: 70 });
-        // Update Animasi Status
         document.getElementById('s-wait').className = "status-item done";
         document.getElementById('s-wait').innerHTML = "<div class='dot'>✓</div> Pembayaran Diterima";
         document.getElementById('s-process').className = "status-item current";
@@ -197,7 +195,7 @@
         document.getElementById('s-process').className = "status-item done";
         document.getElementById('s-process').innerHTML = "<div class='dot'>✓</div> Stok Dikirim";
         document.getElementById('s-done').className = "status-item done";
-        document.getElementById('s-done').innerHTML = "<div class='dot'>✓</div> Selesai!";
+        document.getElementById('s-done').innerHTML = "<div class='dot'>✓</div> Transaksi Selesai!";
     }
 
     async function updateDB(u, inv, status, reduce = false) {
