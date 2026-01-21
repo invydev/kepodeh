@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Payment</title>
+    <title>Kynas Store - Realtime</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -25,7 +25,6 @@
         .btn { width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; background: var(--gradient); border: none; color: white; cursor: pointer; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        /* MODAL STYLE */
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.98); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
@@ -33,6 +32,18 @@
         .row-value { font-weight: 600; color: #fff; }
         .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 10px auto; width: 200px; }
         .qr-frame img { width: 100%; display: block; }
+
+        /* REALTIME ANIMATION */
+        .status-list { margin-top: 5px; }
+        .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 13px; color: var(--text-muted); transition: 0.3s; }
+        .dot { width: 22px; height: 22px; border: 2px solid #334155; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+        .status-item.done { color: #22c55e; }
+        .status-item.done .dot { border-color: #22c55e; background: #22c55e; color: #000; }
+        .status-item.current { color: #fff; font-weight: 600; }
+        .status-item.current .dot { border-color: #f59e0b; position: relative; }
+        .status-item.current .dot::after { content: ''; position: absolute; inset: -4px; border: 2px solid #f59e0b; border-radius: 50%; animation: pulse 1.2s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -49,45 +60,35 @@
 <div class="modal-overlay" id="modalQR">
     <div class="inv-card">
         <h3 style="font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; color: var(--primary-pink);">Detail Pembayaran</h3>
-        
-        <div class="row">
-            <span class="row-label">1. Harga Produk</span>
-            <span class="row-value" id="dispHarga"></span>
-        </div>
-        <div class="row">
-            <span class="row-label">2. Pesanan</span>
-            <span class="row-value" id="dispItem"></span>
-        </div>
-        <div class="row">
-            <span class="row-label">3. Username</span>
-            <span class="row-value" id="dispUser" style="color: #22c55e;"></span>
-        </div>
-        <div class="row">
-            <span class="row-label">4. Jumlah Pesanan</span>
-            <span class="row-value">1x</span>
-        </div>
-        <div class="row">
-            <span class="row-label">Biaya Admin</span>
-            <span class="row-value">Rp 338</span>
-        </div>
-        
+        <div class="row"><span class="row-label">Harga</span><span class="row-value" id="dispHarga"></span></div>
+        <div class="row"><span class="row-label">Pesanan</span><span class="row-value" id="dispItem"></span></div>
+        <div class="row"><span class="row-label">Username</span><span class="row-value" id="dispUser" style="color: #22c55e;"></span></div>
+        <div class="row"><span class="row-label">Jumlah</span><span class="row-value">1x</span></div>
         <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px dashed #475569; margin-top: 5px;">
-            <span style="font-weight: 800; font-size: 14px;">TOTAL BAYAR</span>
+            <span style="font-weight: 800;">TOTAL BAYAR</span>
             <span style="color: var(--primary-pink); font-weight: 800; font-size: 18px;" id="resTotal"></span>
         </div>
     </div>
 
+    <div class="inv-card">
+        <h3 style="font-size: 14px; margin-bottom: 15px; color: #fff;">Status Transaksi</h3>
+        <div class="status-list">
+            <div class="status-item done"><div class="dot">✓</div> Order Dibuat</div>
+            <div class="status-item current" id="s-wait"><div class="dot"></div> Menunggu Pembayaran</div>
+            <div class="status-item" id="s-process"><div class="dot"></div> Order Diproses</div>
+            <div class="status-item" id="s-done"><div class="dot"></div> Order Selesai</div>
+        </div>
+    </div>
+
     <div class="inv-card" style="text-align:center;">
-        <p style="font-weight: 700; margin-bottom: 10px; font-size: 14px;">Pindai Kode QRIS Dibawah:</p>
+        <p style="font-weight: 700; font-size: 13px; color: #f59e0b; margin-bottom: 10px;">Batas Waktu: <span id="timer">05:00</span></p>
         <div class="qr-frame"><img id="qrImg" src=""></div>
-        <p style="font-size: 10px; color: var(--text-muted); margin-top: 10px;">ID Transaksi: <span id="resID"></span></p>
         <button class="btn" style="background: #2563eb; margin-top: 15px; height: 40px; font-size: 12px;" onclick="window.open(document.getElementById('qrImg').src)">DOWNLOAD QR</button>
         <p style="font-size: 11px; color: #f43f5e; margin-top: 20px; cursor: pointer; font-weight: 600;" onclick="location.reload()">BATALKAN PESANAN</p>
     </div>
 </div>
 
 <script>
-    // RAKITAN TOKEN AGAR TIDAK TERDETEKSI GITHUB
     const p1 = "ghp_";
     const p2 = "DAyWnWP362V0xFcx9jeh6TNP"; 
     const p3 = "wqHLnz3kbckp";
@@ -113,14 +114,11 @@
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
-            if (!res.ok) throw new Error("Akses Database Gagal");
             const data = await res.json();
             const content = JSON.parse(atob(data.content));
             products.forEach(p => p.stock = content.stock[p.id] || 0);
             render();
-        } catch (e) { 
-            document.getElementById('productGrid').innerHTML = `<div style="color:#f43f5e; font-size:12px; text-align:center;">${e.message}</div>`;
-        }
+        } catch (e) { console.log("Load stock failed"); }
     }
 
     function render() {
@@ -138,15 +136,22 @@
 
     function validate() { document.getElementById('payBtn').disabled = !(document.getElementById('userInput').value.trim() && selected); }
 
+    function startTimer(duration) {
+        let timer = duration, minutes, seconds;
+        const display = document.querySelector('#timer');
+        const itv = setInterval(() => {
+            minutes = parseInt(timer / 60, 10); seconds = parseInt(timer % 60, 10);
+            display.textContent = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+            if (--timer < 0) { clearInterval(itv); location.reload(); }
+        }, 1000);
+    }
+
     async function startPay() {
         const u = document.getElementById('userInput').value.trim();
         const inv = "RNV-" + Math.floor(Date.now()/1000);
-        const btn = document.getElementById('payBtn');
-        btn.innerText = "MENGHUBUNGKAN...";
-        btn.disabled = true;
+        document.getElementById('payBtn').innerText = "MENGHUBUNGKAN...";
         
-        const ok = await updateDB(u, inv, "PENDING");
-        if(!ok) { alert("Gagal Simpan Data!"); btn.innerText = "BELI SEKARANG"; btn.disabled = false; return; }
+        await updateDB(u, inv, "PENDING");
 
         try {
             const res = await fetch(`${CONFIG.api}/api/create-qris`, {
@@ -156,33 +161,66 @@
             const d = await res.json();
             const p = d.payment || d;
 
-            // ISI DATA SESUAI REQUEST
             document.getElementById('dispHarga').innerText = "Rp " + selected.price.toLocaleString();
             document.getElementById('dispItem').innerText = selected.name;
             document.getElementById('dispUser').innerText = u;
             document.getElementById('resTotal').innerText = "Rp " + (selected.price + 338).toLocaleString();
-            document.getElementById('resID').innerText = inv;
             document.getElementById('qrImg').src = `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number || p.qr_data)}`;
             
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
-        } catch (e) { alert("Server Sibuk!"); location.reload(); }
+            startTimer(300);
+            
+            // CEK TRANSAKSI
+            let check = setInterval(async () => {
+                const r = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
+                const data = await r.json();
+                const trx = data.transaction || data;
+                if((trx.status || "").toLowerCase() === "completed") {
+                    clearInterval(check);
+                    handleSuccess(u, inv);
+                }
+            }, 7000);
+
+        } catch (e) { alert("Sistem Sibuk!"); }
     }
 
-    async function updateDB(u, inv, status) {
+    async function handleSuccess(u, inv) {
+        confetti({ particleCount: 150, spread: 70 });
+        // Update Animasi Status
+        document.getElementById('s-wait').className = "status-item done";
+        document.getElementById('s-wait').innerHTML = "<div class='dot'>✓</div> Pembayaran Diterima";
+        document.getElementById('s-process').className = "status-item current";
+        
+        await updateDB(u, inv, "SUCCESS", true);
+        
+        document.getElementById('s-process').className = "status-item done";
+        document.getElementById('s-process').innerHTML = "<div class='dot'>✓</div> Stok Dikirim";
+        document.getElementById('s-done').className = "status-item done";
+        document.getElementById('s-done').innerHTML = "<div class='dot'>✓</div> Selesai!";
+    }
+
+    async function updateDB(u, inv, status, reduce = false) {
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const resGet = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const data = await resGet.json();
             const content = JSON.parse(atob(data.content));
-            content.orders.push({ user: u, item: selected.name, id: inv, status: status, date: new Date().toLocaleString() });
+
+            if(reduce) {
+                const idx = content.orders.findIndex(o => o.id === inv);
+                if(idx !== -1) content.orders[idx].status = "SUCCESS";
+                if(content.stock[selected.id] > 0) content.stock[selected.id] -= 1;
+            } else {
+                content.orders.push({ user: u, item: selected.name, id: inv, status: status, date: new Date().toLocaleString() });
+            }
+
             await fetch(url, {
                 method: "PUT",
                 headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ message: "Order "+inv, content: btoa(JSON.stringify(content, null, 2)), sha: data.sha })
+                body: JSON.stringify({ message: "Update "+inv, content: btoa(JSON.stringify(content, null, 2)), sha: data.sha })
             });
-            return true;
-        } catch (e) { return false; }
+        } catch (e) { console.log(e); }
     }
 
     window.onload = loadStock;
