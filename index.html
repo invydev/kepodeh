@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Auto Stock</title>
+    <title>Kynas Store - Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -26,19 +26,19 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.98); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        .qr-frame { background: white; padding: 12px; border-radius: 12px; margin: 15px auto; width: 220px; }
+        .qr-frame { background: white; padding: 12px; border-radius: 12px; margin: 15px auto; width: 220px; text-align: center; }
         .qr-frame img { width: 100%; display: block; }
         .status-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); }
         .status-item.done { color: #22c55e; }
-        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 10px; }
+        .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container" id="mainPage">
     <div class="header"><h1>Kynas Store</h1><p>Stok Otomatis & Terintegrasi</p></div>
-    <div class="card"><div class="grid" id="productGrid">Memuat data dari GitHub...</div></div>
+    <div class="card"><div class="grid" id="productGrid">Menghubungkan ke GitHub...</div></div>
     <div class="card">
         <input type="text" id="userInput" class="input-field" placeholder="Username Roblox..." oninput="validate()">
         <button id="payBtn" class="btn" disabled onclick="startPay()">BELI SEKARANG</button>
@@ -52,12 +52,12 @@
     </div>
     <div class="inv-card">
         <div class="status-item done"><div class="dot">✓</div> Data Tersimpan</div>
-        <div class="status-item" id="statusWait"><div class="dot">⏳</div> Menunggu Pembayaran</div>
-        <div class="status-item" id="statusDone"><div class="dot">⚪</div> Selesai</div>
+        <div class="status-item" id="statusWait"><div class="dot">2</div> Menunggu Pembayaran</div>
+        <div class="status-item" id="statusDone"><div class="dot">3</div> Order Selesai</div>
     </div>
     <div class="inv-card" style="text-align:center;">
         <div class="qr-frame"><img id="qrImg" src=""></div>
-        <p style="font-size:10px; color:#94a3b8;">ORDER ID: <span id="resID"></span></p>
+        <p style="font-size:10px; color:#94a3b8; margin-top:10px;">ID: <span id="resID"></span></p>
     </div>
 </div>
 
@@ -80,9 +80,16 @@
 
     async function loadStock() {
         try {
+            // Tambahkan timestamp agar tidak terkena cache browser
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
+            
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Gagal akses API");
+            }
+
             const data = await res.json();
             const content = JSON.parse(atob(data.content));
             
@@ -91,7 +98,12 @@
                 render();
             }
         } catch (e) { 
-            document.getElementById('productGrid').innerHTML = "<span style='color:red'>Gagal memuat stok. Pastikan order.json benar!</span>";
+            console.error("Detail Error:", e);
+            document.getElementById('productGrid').innerHTML = `
+                <div style="color:#f43f5e; font-size:12px; padding:10px; border:1px solid #f43f5e; border-radius:10px;">
+                    <b>ERROR:</b> ${e.message}<br>
+                    <small>Cek apakah Token GitHub masih aktif.</small>
+                </div>`;
         }
     }
 
@@ -102,7 +114,11 @@
             const isOut = p.stock <= 0;
             const div = document.createElement('div');
             div.className = `item ${isOut ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
-            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div class="p-stock">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>`;
+            div.innerHTML = `
+                <div class="p-name">${p.name}</div>
+                <div class="p-price">Rp ${p.price.toLocaleString()}</div>
+                <div class="p-stock">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>
+            `;
             if(!isOut) div.onclick = () => { selected = p; render(); validate(); };
             grid.appendChild(div);
         });
@@ -113,9 +129,19 @@
     async function startPay() {
         const u = document.getElementById('userInput').value.trim();
         const inv = "RNV-" + Math.floor(Date.now()/1000);
-        document.getElementById('payBtn').disabled = true;
+        const btn = document.getElementById('payBtn');
+        
+        btn.disabled = true;
+        btn.innerText = "MENYIMPAN DATA...";
 
-        await updateDB(u, inv, "PENDING");
+        // Step 1: Simpan ke GitHub (Pending)
+        const successSave = await updateDB(u, inv, "PENDING");
+        if(!successSave) {
+            alert("Gagal menyimpan data ke GitHub. Periksa Token kamu!");
+            btn.disabled = false;
+            btn.innerText = "BELI SEKARANG";
+            return;
+        }
 
         try {
             const res = await fetch(`${CONFIG.api}/api/create-qris`, {
@@ -129,35 +155,42 @@
             document.getElementById('resTotal').innerText = "Rp " + (selected.price + 338).toLocaleString();
             document.getElementById('resID').innerText = inv;
             document.getElementById('qrImg').src = `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number || p.qr_data)}`;
+            
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
 
             let poll = setInterval(async () => {
-                const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
-                const r = await check.json();
-                const trx = r.transaction || r;
-                if((trx.status || "").toLowerCase() === "completed") {
-                    clearInterval(poll);
-                    handleSuccess(u, inv);
-                }
+                try {
+                    const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
+                    const r = await check.json();
+                    const trx = r.transaction || r;
+                    if((trx.status || "").toLowerCase() === "completed") {
+                        clearInterval(poll);
+                        handleSuccess(u, inv);
+                    }
+                } catch(e) {}
             }, 6000);
-        } catch (e) { alert("Gagal!"); location.reload(); }
+        } catch (e) { alert("Gagal membuat pembayaran!"); location.reload(); }
     }
 
     async function handleSuccess(u, inv) {
         confetti({ particleCount: 150, spread: 70 });
-        document.getElementById('statusWait').className = "status-item done";
-        document.getElementById('statusWait').innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
+        const sWait = document.getElementById('statusWait');
+        sWait.className = "status-item done";
+        sWait.innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
+        
         await updateDB(u, inv, "SUCCESS", true);
-        document.getElementById('statusDone').className = "status-item done";
-        document.getElementById('statusDone').innerHTML = '<div class="dot">✓</div> Stok Berkurang';
+        
+        const sDone = document.getElementById('statusDone');
+        sDone.className = "status-item done";
+        sDone.innerHTML = '<div class="dot">✓</div> Stok Berhasil Dipotong';
     }
 
     async function updateDB(u, inv, status, reduce = false) {
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-            const res = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
-            const data = await res.json();
+            const resGet = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
+            const data = await resGet.json();
             const content = JSON.parse(atob(data.content));
 
             if (reduce) {
@@ -165,15 +198,29 @@
                 if (idx !== -1) content.orders[idx].status = "SUCCESS";
                 if (content.stock[selected.id] > 0) content.stock[selected.id] -= 1;
             } else {
-                content.orders.push({ username: u, item: selected.name, order_id: inv, status: status, date: new Date().toLocaleString() });
+                content.orders.push({ 
+                    username: u, 
+                    item: selected.name, 
+                    order_id: inv, 
+                    status: status, 
+                    date: new Date().toLocaleString('id-ID') 
+                });
             }
 
-            await fetch(url, {
+            const resPut = await fetch(url, {
                 method: "PUT",
                 headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ message: "Update DB", content: btoa(JSON.stringify(content, null, 2)), sha: data.sha })
+                body: JSON.stringify({ 
+                    message: `Update: ${status}`, 
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), 
+                    sha: data.sha 
+                })
             });
-        } catch (e) { console.error(e); }
+            return resPut.ok;
+        } catch (e) { 
+            console.error(e); 
+            return false;
+        }
     }
 
     window.onload = loadStock;
