@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kynas Store - Modern Pink</title>
+    <title>Kynas Store - Auto Update</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -36,48 +36,35 @@
         .item.out { opacity: 0.5; filter: grayscale(1); }
         .p-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
         .p-price { font-weight: 800; font-size: 14px; color: var(--primary-pink); }
-        .p-stock { font-size: 9px; color: #64748b; }
 
-        .input-label { font-size: 11px; font-weight: 700; color: var(--secondary-pink); text-transform: uppercase; margin-bottom: 8px; display: block; }
         .input-field { 
             width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; 
             border-radius: 10px; color: white; font-size: 13px; outline: none; margin-bottom: 15px;
         }
-        .input-field:focus { border-color: var(--primary-pink); }
 
         .btn { 
             width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; 
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: var(--gradient); border: none; color: white;
+            cursor: pointer; background: var(--gradient); border: none; color: white;
             box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
         }
-        .btn:disabled { background: #475569; box-shadow: none; opacity: 0.6; cursor: not-allowed; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; z-index: 100; padding: 20px; overflow-y: auto; }
         .inv-card { width: 100%; max-width: 360px; background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        .inv-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
-        .inv-label { color: var(--text-muted); }
-        .inv-val { font-weight: 700; color: var(--text-light); }
         
         .timer-box { 
             background: rgba(244, 63, 94, 0.1); border: 1px solid var(--primary-pink);
             color: var(--primary-pink); padding: 10px; border-radius: 10px;
-            text-align: center; font-weight: 800; margin-bottom: 15px; font-size: 16px;
+            text-align: center; font-weight: 800; margin-bottom: 15px;
         }
 
-        .status-list { list-style: none; margin-top: 10px; }
         .status-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 14px; color: var(--text-muted); }
-        .status-item.active { color: #f59e0b; }
         .status-item.done { color: var(--text-light); }
-        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; }
         .status-item.done .dot { background: #22c55e; border-color: #22c55e; color: white; font-size: 12px; }
-        .status-item.active .dot { border-color: #f59e0b; background: radial-gradient(circle, #f59e0b 4px, transparent 5px); }
 
         .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 15px auto; width: 200px; text-align: center; }
         .qr-frame img { width: 100%; display: block; }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body>
@@ -89,44 +76,38 @@
     </div>
 
     <div class="card">
-        <span class="input-label">Pilih Produk</span>
         <div class="grid" id="productGrid"></div>
     </div>
 
     <div class="card">
-        <span class="input-label">Data Akun</span>
         <input type="text" id="userInput" class="input-field" placeholder="Username Roblox..." oninput="validate()">
-        <button id="payBtn" class="btn" disabled onclick="startPay()">
-            BELI SEKARANG
-        </button>
+        <button id="payBtn" class="btn" disabled onclick="startPay()">BELI SEKARANG</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalQR">
     <div class="inv-card">
         <div class="timer-box">Selesaikan Dalam: <span id="countdown">05:00</span></div>
-        <div class="inv-row"><span class="inv-label">Username</span><span class="inv-val" id="dispUser">-</span></div>
-        <div class="inv-row"><span class="inv-label">Sub Total</span><span class="inv-val" id="resTotal" style="color:var(--primary-pink)">Rp 0</span></div>
+        <p>Username: <b id="dispUser"></b></p>
+        <p>Total: <b id="resTotal" style="color:var(--primary-pink)"></b></p>
     </div>
 
     <div class="inv-card">
-        <h3 style="font-size:16px; margin-bottom:15px;">Status Transaksi</h3>
         <ul class="status-list">
             <li class="status-item done"><div class="dot">✓</div> Order Dibuat</li>
-            <li class="status-item active" id="statusWait"><div class="dot"></div> Menunggu Pembayaran</li>
-            <li class="status-item" id="statusProcess"><div class="dot"></div> Order Diproses</li>
+            <li class="status-item" id="statusWait"><div class="dot"></div> Menunggu Pembayaran</li>
             <li class="status-item" id="statusDone"><div class="dot"></div> Order Selesai</li>
         </ul>
     </div>
 
     <div class="inv-card" style="text-align:center;">
         <div class="qr-frame"><img id="qrImg" src="" alt="QR"></div>
-        <p style="font-size:10px; color:#94a3b8; margin-top:15px;">ID: <span id="resID"></span></p>
-        <button onclick="konfirmasiBatal()" id="btnBatal" style="background:none; border:none; color:#ef4444; font-size:12px; margin-top:20px; cursor:pointer; font-weight:700;">BATALKAN PESANAN</button>
+        <p style="font-size:10px; color:#94a3b8;">ID: <span id="resID"></span></p>
     </div>
 </div>
 
 <script>
+    // --- KONFIGURASI SUDAH TERISI ---
     const CONFIG = {
         token: "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", 
         owner: "invydev",
@@ -136,9 +117,8 @@
     };
 
     const products = [
-        { id: '1', name: '100 ROBUX', price: 500, stock: 1 },
-        { id: '2', name: '500 ROBUX', price: 70000, stock: 99 },
-        { id: '3', name: '1000 ROBUX', price: 135000, stock: 0 }
+        { id: '1', name: '100 ROBUX', price: 15000, stock: 10 },
+        { id: '2', name: '500 ROBUX', price: 70000, stock: 5 }
     ];
 
     let selected = null, poll = null, timerInterval = null;
@@ -148,25 +128,21 @@
         grid.innerHTML = '';
         products.forEach(p => {
             const div = document.createElement('div');
-            const isOut = p.stock === 0;
-            div.className = `item ${isOut ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
-            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div><div class="p-stock">${isOut ? 'HABIS' : 'Stok: '+p.stock}</div>`;
-            if(!isOut) div.onclick = () => { selected = p; render(); validate(); };
+            div.className = `item ${p.stock === 0 ? 'out' : ''} ${selected?.id === p.id ? 'active' : ''}`;
+            div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-price">Rp ${p.price.toLocaleString()}</div>`;
+            if(p.stock > 0) div.onclick = () => { selected = p; render(); validate(); };
             grid.appendChild(div);
         });
     }
 
     function validate() {
-        const u = document.getElementById('userInput').value.trim();
-        document.getElementById('payBtn').disabled = !(u && selected);
+        document.getElementById('payBtn').disabled = !(document.getElementById('userInput').value.trim() && selected);
     }
 
     async function startPay() {
         const u = document.getElementById('userInput').value.trim();
         const inv = "RNV-" + Date.now();
-        const btn = document.getElementById('payBtn');
-        btn.disabled = true;
-        btn.innerHTML = `<div class="spinner"></div> PROSES...`;
+        document.getElementById('payBtn').disabled = true;
 
         try {
             const res = await fetch(`${CONFIG.api}/api/create-qris`, {
@@ -179,66 +155,59 @@
             document.getElementById('dispUser').innerText = u;
             document.getElementById('resTotal').innerText = "Rp " + (selected.price + 338).toLocaleString();
             document.getElementById('resID').innerText = inv;
-            document.getElementById('qrImg').src = p.code ? `https://app.pakasir.com/qris/${p.code}.png` : `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number)}`;
+            document.getElementById('qrImg').src = `https://quickchart.io/qr?text=${encodeURIComponent(p.payment_number || p.qr_data)}`;
             
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('modalQR').style.display = 'flex';
 
             startTimer(300);
 
-            // LOGIKA POLLING YANG DIPERBAIKI (CEK "COMPLETED")
+            // POLLING CEK STATUS (FIXED UNTUK "COMPLETED")
             poll = setInterval(async () => {
                 try {
                     const check = await fetch(`${CONFIG.api}/api/transaction-detail?amount=${selected.price}&order_id=${inv}`);
                     const resCheck = await check.json();
                     
-                    // Cek di dalam object transaction (sesuai screenshot kamu)
+                    // Cek status di dalam objek transaction sesuai screenshot kamu
                     const trx = resCheck.transaction || resCheck;
                     const status = (trx.status || "").toLowerCase();
 
-                    // Menerima completed, success, atau settled
-                    if(status === "completed" || status === "success" || status === "settled") {
+                    if(status === "completed" || status === "success") {
                         clearInterval(poll);
                         clearInterval(timerInterval);
                         handleSuccess(u, selected.name, inv);
                     }
-                } catch (e) { console.log("Re-checking..."); }
-            }, 6000); 
+                } catch (e) {}
+            }, 5000);
         } catch (e) { alert("Gagal!"); location.reload(); }
     }
 
     async function handleSuccess(username, item, id) {
-        document.getElementById('btnBatal').style.display = 'none';
-        const sWait = document.getElementById('statusWait');
-        const sProc = document.getElementById('statusProcess');
-        sWait.className = "status-item done"; sWait.innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
-        sProc.className = "status-item active";
+        document.getElementById('statusWait').className = "status-item done";
+        document.getElementById('statusWait').innerHTML = '<div class="dot">✓</div> Pembayaran Berhasil';
+        document.getElementById('statusDone').className = "status-item done";
         confetti({ particleCount: 150, spread: 70 });
 
+        // SIMPAN KE GITHUB
         try {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
             const getFile = await fetch(url, { headers: { "Authorization": `token ${CONFIG.token}` }});
             const fileData = await getFile.json();
-            const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+            const currentContent = JSON.parse(atob(fileData.content));
             
-            if(!currentContent.orders.some(o => o.order_id === id)) {
-                currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString('id-ID') });
-                await fetch(url, {
-                    method: "PUT",
-                    headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message: `Order: ${username}`,
-                        content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
-                        sha: fileData.sha
-                    })
-                });
-            }
-        } catch (e) { console.error("Database Error:", e); }
+            currentContent.orders.push({ username, item, order_id: id, date: new Date().toLocaleString() });
 
-        setTimeout(() => {
-            sProc.className = "status-item done"; sProc.innerHTML = '<div class="dot">✓</div> Order Diproses';
-            document.getElementById('statusDone').className = "status-item done";
-        }, 3000);
+            await fetch(url, {
+                method: "PUT",
+                headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: `New Order: ${username}`,
+                    content: btoa(JSON.stringify(currentContent, null, 2)),
+                    sha: fileData.sha
+                })
+            });
+            console.log("Order saved to GitHub!");
+        } catch (e) { console.error("GitHub Save Error:", e); }
     }
 
     function startTimer(t) {
@@ -248,8 +217,6 @@
             if (--t < 0) { clearInterval(poll); location.reload(); }
         }, 1000);
     }
-
-    function konfirmasiBatal() { if(confirm("Yakin ingin membatalkan?")) location.reload(); }
     window.onload = render;
 </script>
 </body>
